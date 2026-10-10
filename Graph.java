@@ -185,3 +185,109 @@ public class Graph {
         }
         return found;
     }
+
+    /** Mark an edge as active (recovered). */
+    public boolean markEdgeActive(String src, String dst) {
+        boolean found = false;
+        for (Edge e : edges) {
+            if (e.connects(src, dst)) {
+                e.markActive();
+                found = true;
+            }
+        }
+        for (List<Edge> edgeList : adjacencyList.values()) {
+            for (Edge e : edgeList) {
+                if (e.connects(src, dst)) {
+                    e.markActive();
+                }
+            }
+        }
+        return found;
+    }
+
+    // =======================================================================
+    // Accessors used by other modules
+    // =======================================================================
+
+    public Map<String, List<Edge>> getAdjacencyList() {
+        return adjacencyList;
+    }
+
+    public Map<String, Node> getNodes() {
+        return nodes;
+    }
+
+    public List<Edge> getEdges() {
+        return edges;
+    }
+
+    public Node getNode(String id) {
+        return nodes.get(id);
+    }
+
+    public boolean hasNode(String id) {
+        return nodes.containsKey(id);
+    }
+
+    public boolean isEmpty() {
+        return nodes.isEmpty();
+    }
+
+    /** Return active (non-failed) neighbours of a node. */
+    public List<Edge> getActiveNeighbours(String nodeId) {
+        List<Edge> result = new ArrayList<>();
+        if (!adjacencyList.containsKey(nodeId)) return result;
+        for (Edge e : adjacencyList.get(nodeId)) {
+            // Skip failed edge or failed destination node
+            if (!e.isFailed() && !nodes.get(e.getDestination()).isFailed()) {
+                result.add(e);
+            }
+        }
+        return result;
+    }
+
+    /** Return all neighbours (including failed) of a node. */
+    public List<Edge> getAllNeighbours(String nodeId) {
+        List<Edge> result = new ArrayList<>();
+        if (!adjacencyList.containsKey(nodeId)) return result;
+        return new ArrayList<>(adjacencyList.get(nodeId));
+    }
+
+    // =======================================================================
+    // Reset
+    // =======================================================================
+    public void reset() {
+        adjacencyList.clear();
+        nodes.clear();
+        edges.clear();
+    }
+
+    // =======================================================================
+    // Display
+    // =======================================================================
+
+    /**
+     * Render the network as an adjacency-list tree to the terminal.
+     * Uses ANSI colours where supported.
+     */
+    public void display() {
+        if (nodes.isEmpty()) {
+            System.out.println("  (Network is empty. Use option 1 to create a network.)");
+            return;
+        }
+
+        int totalNodes   = nodes.size();
+        int activeNodes  = (int) nodes.values().stream().filter(n -> !n.isFailed()).count();
+        int failedNodes  = totalNodes - activeNodes;
+        int totalEdges   = edges.size();
+        int activeEdges  = (int) edges.stream().filter(e -> !e.isFailed()).count();
+        int failedEdges  = totalEdges - activeEdges;
+
+        String networkStatus;
+        if (failedNodes == 0 && failedEdges == 0) {
+            networkStatus = Colors.GREEN + "FULLY OPERATIONAL" + Colors.RESET;
+        } else if (activeNodes == 0) {
+            networkStatus = Colors.RED + "DOWN" + Colors.RESET;
+        } else {
+            networkStatus = Colors.YELLOW + "DEGRADED" + Colors.RESET;
+        }
