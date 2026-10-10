@@ -291,3 +291,66 @@ public class Graph {
         } else {
             networkStatus = Colors.YELLOW + "DEGRADED" + Colors.RESET;
         }
+
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+        System.out.println(Colors.CYAN + "                    CURRENT NETWORK" + Colors.RESET);
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+        System.out.println();
+
+        for (String nodeId : adjacencyList.keySet()) {
+            Node n = nodes.get(nodeId);
+            String nodeColor = n.isFailed() ? Colors.RED : Colors.GREEN;
+            System.out.println(nodeColor + nodeId + Colors.RESET
+                + " [" + nodeColor + n.getStatus() + Colors.RESET + "]");
+
+            List<Edge> edgeList = adjacencyList.get(nodeId);
+            for (int i = 0; i < edgeList.size(); i++) {
+                Edge e = edgeList.get(i);
+                String branch = (i == edgeList.size() - 1) ? " └── " : " ├── ";
+                String edgeColor = e.isFailed() ? Colors.RED : Colors.GREEN;
+                System.out.println(branch
+                    + edgeColor + e.getDestination()
+                    + " [Weight: " + e.getWeight() + "] ["
+                    + e.getStatus() + "]" + Colors.RESET);
+            }
+            System.out.println();
+        }
+
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+        System.out.println("Network Status    : " + networkStatus);
+        System.out.println("Active Nodes      : " + Colors.GREEN + activeNodes + Colors.RESET
+                         + " / " + totalNodes);
+        System.out.println("Failed Nodes      : " + (failedNodes > 0 ? Colors.RED : Colors.GREEN)
+                         + failedNodes + Colors.RESET);
+        System.out.println("Active Links      : " + Colors.GREEN + activeEdges + Colors.RESET
+                         + " / " + totalEdges);
+        System.out.println("Failed Links      : " + (failedEdges > 0 ? Colors.RED : Colors.GREEN)
+                         + failedEdges + Colors.RESET);
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+    }
+
+    /** Print adjacency list in raw text form. */
+    public void printAdjacencyList() {
+        System.out.println(Colors.CYAN + "\n[ADJACENCY LIST REPRESENTATION]" + Colors.RESET);
+        for (String nodeId : adjacencyList.keySet()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(nodeId).append(" -> ");
+            List<Edge> edgeList = adjacencyList.get(nodeId);
+            if (edgeList.isEmpty()) {
+                sb.append("(no connections)");
+            } else {
+                for (int i = 0; i < edgeList.size(); i++) {
+                    Edge e = edgeList.get(i);
+                    sb.append(e.getDestination())
+                      .append("(")
+                      .append(e.getWeight())
+                      .append(")");
+                    if (e.isFailed()) sb.append("*FAILED*");
+                    if (i < edgeList.size() - 1) sb.append(", ");
+                }
+            }
+            System.out.println("  " + sb);
+        }
+        System.out.println();
+    }
+}
