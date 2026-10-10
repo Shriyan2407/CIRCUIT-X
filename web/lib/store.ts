@@ -1,0 +1,103 @@
+'use client';
+
+import { create } from 'zustand';
+import { CHAPTERS, type ChapterId } from './story';
+import {
+  bfs,
+  dfs,
+  dijkstra,
+  HEALTHY,
+  NODE_IDS,
+  edgeKey,
+  shortestPath,
+  type AlgoKind,
+  type Frame,
+  type NetState,
+} from './network';
+import { MinHeap, type HeapItem } from './minheap';
+
+export interface Run {
+  kind: AlgoKind;
+  src: string;
+  dst?: string;
+  frames: Frame[];
+  index: number;
+  playing: boolean;
+  label: string; // e.g. "BFS from A"
+}
+
+export interface HeapFrame {
+  items: HeapItem[];
+  label: string;
+  note: string;
+}
+
+export interface RecoveryStep {
+  text: string;
+  done: boolean;
+}
+
+export type ArchNodeId = 'root' | 'graph' | 'node' | 'edge' | 'adj' | 'alg' | 'bfs' | 'dfs' | 'dij' | 'heap' | 'fail' | 'nodefail' | 'edgefail' | 'analysis' | 'conn' | 'comp' | 'recovery' | 'reroute';
+
+export const ALGO_STEP_MS = 720;
+
+export interface DemoState {
+  active: boolean;
+  step: number;
+  total: number;
+  caption: string;
+}
+
+interface SimConfig {
+  src: string;
+  dst: string;
+  algo: AlgoKind;
+}
+
+interface State {
+  chapter: ChapterId;
+  booted: boolean;
+  bootT: number; // 0..1 network construction progress
+  net: NetState;
+  run: Run | null;
+  heapFrames: HeapFrame[];
+  heapIndex: number;
+  hovered: string | null;
+  selected: string | null;
+  menuOpen: boolean;
+  webgl: boolean | null;
+  mobile: boolean;
+  mouse: { x: number; y: number };
+  breakAt: Record<string, number>; // edge key -> time it broke (for the fracture animation)
+  recovery: RecoveryStep[];
+  archSelected: ArchNodeId;
+  sim: SimConfig;
+  diagnostic: string | null;
+  demo: DemoState;
+  log: string[];
+
+  setBooted: () => void;
+  startDemo: () => void;
+  stopDemo: () => void;
+  setBootT: (t: number) => void;
+  setHovered: (id: string | null) => void;
+  setSelected: (id: string | null) => void;
+  setMenuOpen: (open: boolean) => void;
+  setWebgl: (ok: boolean) => void;
+  setMobile: (m: boolean) => void;
+  setMouse: (x: number, y: number) => void;
+  setArchSelected: (id: ArchNodeId) => void;
+  setSim: (patch: Partial<SimConfig>) => void;
+  setNet: (net: NetState) => void;
+  failNode: (id: string) => void;
+  failEdge: (key: string) => void;
+  recoverAll: () => void;
+  startRun: (kind: AlgoKind, src: string, dst?: string) => void;
+  stepRun: (delta: number) => void;
+  togglePlay: () => void;
+  restartRun: () => void;
+  stopRun: () => void;
+  stepHeap: (delta: number) => void;
+  setRecovery: (steps: RecoveryStep[]) => void;
+  setChapter: (id: ChapterId) => void;
+}
