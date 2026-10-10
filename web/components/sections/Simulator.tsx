@@ -104,3 +104,79 @@ export function SimulatorChapter() {
               </button>
             </div>
           </fieldset>
+
+          <fieldset className="panel">
+            <legend className="diag-title">FAILURES</legend>
+            <label>
+              <span>NODE</span>
+              <select value={failNodeChoice} onChange={(e) => setFailNodeChoice(e.target.value)} disabled={liveNodes.length === 0}>
+                {liveNodes.map((id) => (
+                  <option key={id} value={id}>{id}</option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              className="btn danger"
+              onClick={() => failNode(failNodeChoice)}
+              disabled={liveNodes.length === 0}
+            >
+              FAIL NODE
+            </button>
+            <label>
+              <span>LINK</span>
+              <select value={failEdgeChoice} onChange={(e) => setFailEdgeChoice(e.target.value)} disabled={liveEdges.length === 0}>
+                {liveEdges.map((k) => (
+                  <option key={k} value={k}>{k.replace('-', ' — ')}</option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              className="btn danger"
+              onClick={() => failEdge(failEdgeChoice)}
+              disabled={liveEdges.length === 0}
+            >
+              FAIL LINK
+            </button>
+            <button type="button" className="btn" onClick={recoverAll} disabled={net.failedNodes.length + net.failedEdges.length === 0}>
+              RECOVER NETWORK
+            </button>
+          </fieldset>
+        </div>
+
+        <DemoBar />
+
+        <AlgorithmHud inline />
+
+        <div className="panel sim-out" role="status">
+          <p className="mono">
+            PATH{' '}
+            <span className={route.cost >= 0 ? 'is-ok' : 'is-bad'}>
+              {sameNode ? sim.src : route.cost >= 0 ? route.path.join(' → ') : 'NO ROUTE'}
+            </span>
+          </p>
+          <p className="mono">
+            COST <span className={route.cost >= 0 ? 'is-ok' : 'is-bad'}>{sameNode ? 0 : route.cost >= 0 ? route.cost : '—'}</span>
+          </p>
+          <p className="mono">
+            STATE{' '}
+            <span className={status === 'HEALTHY' ? 'is-ok' : status === 'DEGRADED' ? 'is-warn' : 'is-bad'}>{status}</span>
+          </p>
+          {run && <p className="mono dim">Last run: {run.label}</p>}
+          {log.length > 0 && (
+            <ol className="sim-log mono">
+              {log.map((entry, i) => (
+                <li key={`${i}-${entry}`}>{entry}</li>
+              ))}
+            </ol>
+          )}
+          <p className="diag-note">
+            Clicking a node in the scene inspects it. Failures use the same FailureManager logic as the Java project.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
