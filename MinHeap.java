@@ -144,3 +144,66 @@ public class MinHeap {
             i = parent;
         }
     }
+
+    /**
+     * bubbleDown(i) — Repeatedly swap element at index i with its
+     * smallest child while the heap property is violated.
+     *
+     *   left  child = 2*i + 1
+     *   right child = 2*i + 2
+     */
+    private void bubbleDown(int i) {
+        while (true) {
+            int smallest = i;
+            int left     = 2 * i + 1;
+            int right    = 2 * i + 2;
+
+            if (left  < size && values[left]  < values[smallest]) smallest = left;
+            if (right < size && values[right] < values[smallest]) smallest = right;
+
+            if (smallest == i) break;  // Heap property satisfied
+
+            swap(i, smallest);
+            i = smallest;
+        }
+    }
+
+    /** Swap elements at positions i and j. */
+    private void swap(int i, int j) {
+        String tmpKey = keys[i];
+        int    tmpVal = values[i];
+        keys[i]   = keys[j];
+        values[i] = values[j];
+        keys[j]   = tmpKey;
+        values[j] = tmpVal;
+    }
+
+    /** Double the capacity of the heap arrays. */
+    private void resize() {
+        capacity *= 2;
+        String[] newKeys   = new String[capacity];
+        int[]    newValues = new int[capacity];
+        System.arraycopy(keys,   0, newKeys,   0, size);
+        System.arraycopy(values, 0, newValues, 0, size);
+        keys   = newKeys;
+        values = newValues;
+    }
+
+    // -----------------------------------------------------------------------
+    // Inner class — heap entry
+    // -----------------------------------------------------------------------
+    public static class HeapEntry {
+        public final String key;
+        public final int    value;
+
+        public HeapEntry(String key, int value) {
+            this.key   = key;
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return "(" + key + ", " + value + ")";
+        }
+    }
+}
