@@ -98,3 +98,85 @@ public class Main {
             if (ok) System.out.println(Colors.GREEN + "  ✓ Node '" + name + "' added." + Colors.RESET);
             else    System.out.println(Colors.RED + "  ERROR: Node '" + name + "' already exists." + Colors.RESET);
         }
+
+        System.out.print("\n  How many edges? ");
+        int e = readPositiveInt();
+        for (int i = 0; i < e; i++) {
+            System.out.print("  Edge source      : ");
+            String src = readLine();
+            System.out.print("  Edge destination : ");
+            String dst = readLine();
+            System.out.print("  Weight           : ");
+            int w = readPositiveInt();
+            addEdgeToGraph(src, dst, w);
+        }
+
+        System.out.println(Colors.BOLD_GREEN + "\n  Network creation complete." + Colors.RESET);
+    }
+
+    // =======================================================================
+    // OPTION 2 — Add Node
+    // =======================================================================
+    private static void addNode() {
+        sectionHeader("ADD NODE");
+        System.out.print("  Enter node name: ");
+        String name = readLine();
+        if (name.isEmpty()) { System.out.println(Colors.RED + "  ERROR: Name cannot be empty." + Colors.RESET); return; }
+        boolean ok = graph.addNode(name);
+        if (ok) System.out.println(Colors.GREEN + "\n  ✓ Node '" + name + "' added successfully." + Colors.RESET);
+        else    System.out.println(Colors.RED + "\n  ERROR: Node '" + name + "' already exists." + Colors.RESET);
+    }
+
+    // =======================================================================
+    // OPTION 3 — Add Edge
+    // =======================================================================
+    private static void addEdge() {
+        sectionHeader("ADD EDGE");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Source node      : ");
+        String src = readLine();
+        System.out.print("  Destination node : ");
+        String dst = readLine();
+        System.out.print("  Weight           : ");
+        int w = readPositiveInt();
+        addEdgeToGraph(src, dst, w);
+    }
+
+    private static void addEdgeToGraph(String src, String dst, int w) {
+        if (!graph.hasNode(src)) { System.out.println(Colors.RED + "  ERROR: Node '" + src + "' does not exist." + Colors.RESET); return; }
+        if (!graph.hasNode(dst)) { System.out.println(Colors.RED + "  ERROR: Node '" + dst + "' does not exist." + Colors.RESET); return; }
+        if (src.equals(dst))     { System.out.println(Colors.RED + "  ERROR: Self-loops are not allowed." + Colors.RESET); return; }
+        boolean ok = graph.addEdge(src, dst, w);
+        if (ok) System.out.println(Colors.GREEN + "  ✓ Edge " + src + " --[" + w + "]--> " + dst + " added." + Colors.RESET);
+        else    System.out.println(Colors.RED + "  ERROR: Edge between '" + src + "' and '" + dst + "' already exists." + Colors.RESET);
+    }
+
+    // =======================================================================
+    // OPTION 4 — Remove Node
+    // =======================================================================
+    private static void removeNode() {
+        sectionHeader("REMOVE NODE");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Enter node to remove: ");
+        String name = readLine();
+        if (!graph.hasNode(name)) { System.out.println(Colors.RED + "  ERROR: Node '" + name + "' does not exist." + Colors.RESET); return; }
+        graph.removeNode(name);
+        System.out.println(Colors.GREEN + "  ✓ Node '" + name + "' and all its edges removed." + Colors.RESET);
+    }
+
+    // =======================================================================
+    // OPTION 5 — Remove Edge
+    // =======================================================================
+    private static void removeEdge() {
+        sectionHeader("REMOVE EDGE");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Source node      : ");
+        String src = readLine();
+        System.out.print("  Destination node : ");
+        String dst = readLine();
+        if (!graph.hasNode(src)) { System.out.println(Colors.RED + "  ERROR: Node '" + src + "' does not exist." + Colors.RESET); return; }
+        if (!graph.hasNode(dst)) { System.out.println(Colors.RED + "  ERROR: Node '" + dst + "' does not exist." + Colors.RESET); return; }
+        boolean ok = graph.removeEdge(src, dst);
+        if (ok) System.out.println(Colors.GREEN + "  ✓ Edge " + src + " <-> " + dst + " removed." + Colors.RESET);
+        else    System.out.println(Colors.RED + "  ERROR: No edge exists between '" + src + "' and '" + dst + "'." + Colors.RESET);
+    }
