@@ -123,3 +123,60 @@ public class NetworkAnalyzer {
                 + (connected
                     ? Colors.BOLD_GREEN + "YES" + Colors.RESET
                     : Colors.BOLD_RED   + "NO"  + Colors.RESET));
+
+        if (!connected) {
+            List<Set<String>> components = findComponents();
+            System.out.println("\n  " + Colors.YELLOW + "Connected Components: " + components.size() + Colors.RESET);
+            int idx = 1;
+            for (Set<String> comp : components) {
+                System.out.print("    Component " + idx++ + ": ");
+                System.out.println(Colors.GREEN + String.join("  ", comp) + Colors.RESET);
+            }
+        } else {
+            List<Set<String>> components = findComponents();
+            System.out.println("  Connected Components: 1");
+            System.out.print("  Nodes: ");
+            for (Set<String> comp : components) {
+                System.out.println(Colors.GREEN + String.join("  ", comp) + Colors.RESET);
+            }
+        }
+
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+    }
+
+    /**
+     * printComponents() — Print all connected components.
+     */
+    public void printComponents() {
+        List<Set<String>> components = findComponents();
+
+        System.out.println(Colors.CYAN + "\n============================================================" + Colors.RESET);
+        System.out.println(Colors.CYAN + "             CONNECTED COMPONENTS ANALYSIS" + Colors.RESET);
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+        System.out.println("  Total components: " + components.size());
+        System.out.println();
+
+        int idx = 1;
+        for (Set<String> comp : components) {
+            System.out.println("  Component " + idx++ + " ["
+                    + Colors.YELLOW + comp.size() + " nodes" + Colors.RESET + "]:");
+            System.out.println("    " + Colors.GREEN + String.join(" → ", comp) + Colors.RESET);
+            System.out.println();
+        }
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+    }
+
+    // =======================================================================
+    // Utility
+    // =======================================================================
+
+    private List<String> getActiveNodeIds() {
+        List<String> result = new ArrayList<>();
+        for (Map.Entry<String, Node> entry : graph.getNodes().entrySet()) {
+            if (!entry.getValue().isFailed()) {
+                result.add(entry.getKey());
+            }
+        }
+        return result;
+    }
+}
