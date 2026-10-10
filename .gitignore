@@ -1,0 +1,13 @@
+# Compiled Java
+*.class
+
+# Dependencies / build output
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Env & OS
+.env*
+.DS_Store
+Thumbs.db
