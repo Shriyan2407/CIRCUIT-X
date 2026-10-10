@@ -198,3 +198,91 @@ STEP 1 — Creating Sample Network (8 Nodes)
   + Node B added
   ...
   + Edge A ──[4]── B
+
+STEP 3 — BFS Traversal (starting from node A)
+  BFS Order: A → B → C → D → E → F → G → H
+
+STEP 6 — Simulating Edge Failure: B <-> D
+  [FAILURE] Link B-D has FAILED.
+
+STEP 9 — Finding Shortest Path: A → H
+  Shortest Path: A → C → E → F → H
+  Total Cost: 15
+
+STEP 11 — Rerouting Traffic: A → H (with failures)
+  ✓ Alternate route found!
+  Alternate route: A → B → E → F → H
+  RECOVERY SUCCESSFUL
+
+STEP 15 — Reliability Report
+  Total Nodes       : 8
+  Active Nodes      : 7
+  ...
+  Overall Status    : OPERATIONAL (DEGRADED)
+```
+
+---
+
+## 11. Menu Options
+
+```
+[NETWORK MANAGEMENT]
+  1.  Create Network (wizard)
+  2.  Add Node
+  3.  Add Edge
+  4.  Remove Node
+  5.  Remove Edge
+  6.  Update Edge Weight
+  7.  Display Network
+
+[TRAVERSAL & ANALYSIS]
+  8.  BFS Traversal
+  9.  DFS Traversal
+  10. Check Connectivity
+  11. Find Connected Components
+  12. Find Shortest Path (Dijkstra)
+
+[FAILURE & RECOVERY]
+  13. Simulate Node Failure
+  14. Simulate Edge Failure
+  15. Detect Failures
+  16. Recover Network
+  17. Reroute Traffic
+
+[REPORTS & DEMO]
+  18. Network Reliability Report
+  19. Reset Network
+  20. Run CIRCUIT-X Demo ★
+  0.  Exit
+```
+
+---
+
+## 12. Team Members
+
+*(Add your team member names here)*
+
+---
+
+## 13. Source Files Summary
+
+| File | Lines | Purpose |
+|---|---|---|
+| `Main.java` | ~350 | Entry point, interactive menu |
+| `Graph.java` | ~280 | Adjacency list graph |
+| `Node.java` | ~60 | Network node |
+| `Edge.java` | ~80 | Network edge |
+| `MinHeap.java` | ~200 | Custom binary min-heap |
+| `PathFinder.java` | ~230 | BFS, DFS, Dijkstra |
+| `FailureManager.java` | ~120 | Failure detection |
+| `NetworkAnalyzer.java` | ~130 | Connectivity analysis |
+| `RecoveryEngine.java` | ~150 | Recovery & rerouting |
+| `NetworkDemo.java` | ~180 | Automated demo |
+| `ReliabilityReport.java` | ~120 | Reliability report |
+| `Colors.java` | ~40 | ANSI terminal colors |
+
+---
+
+## License
+
+University DSA Project — For educational use only.
