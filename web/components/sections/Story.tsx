@@ -138,3 +138,87 @@ export function PartitionChapter() {
     </section>
   );
 }
+
+// ---------------------------------------------------------------------------
+// 08 — Rerouting
+// ---------------------------------------------------------------------------
+export function RerouteChapter() {
+  const run = useStore((s) => s.run);
+  const chapter = useStore((s) => s.chapter);
+  const primary = shortestPath(HEALTHY, 'A', 'H');
+  const finished = !!run && run.index >= run.frames.length - 1;
+  const last = run?.frames[run.frames.length - 1];
+  const found = finished && last?.cost !== undefined && last.cost >= 0;
+  const alt = found ? last?.path ?? [] : [];
+  const altCost = found ? last?.cost ?? 0 : 0;
+
+  return (
+    <section id="reroute" data-chapter="reroute" className="chapter">
+      <div className="stack-left">
+        <p className="index">08 — REROUTING</p>
+        {chapter === 'reroute' && (
+          <>
+            <div className="panel">
+              <p className="diag-title">PRIMARY ROUTE</p>
+              <p className="mono">
+                {primary.path.join(' → ')} <span className="dim">· cost {primary.cost}</span>
+              </p>
+              <p className="mono is-bad">LINK C — F OFFLINE</p>
+            </div>
+            <h2 className="display big">
+              {!finished ? (
+                <span className="block is-warn">CALCULATING ALTERNATIVE ROUTE...</span>
+              ) : found ? (
+                <span className="block is-ok">ALTERNATIVE PATH FOUND</span>
+              ) : (
+                <span className="block is-bad">NO ROUTE EXISTS</span>
+              )}
+            </h2>
+            {found && (
+              <div className="panel is-live">
+                <p className="mono route">{alt.join(' → ')}</p>
+                <p className="mono">COST <span className="is-ok">{altCost}</span></p>
+              </div>
+            )}
+            {found && (
+              <p className="statement reveal">
+                THE NETWORK DIDN&apos;T STOP.<br />IT FOUND ANOTHER WAY.
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 09 — Recovery
+// ---------------------------------------------------------------------------
+export function RecoveryChapter() {
+  const steps = useStore((s) => s.recovery);
+  const net = useStore((s) => s.net);
+  const done = steps.length > 0 && steps[steps.length - 1].text === 'RECOVERY COMPLETE';
+  const healthy = networkStatus(net) === 'HEALTHY';
+  return (
+    <section id="recovery" data-chapter="recovery" className="chapter">
+      <div className="stack-left">
+        <p className="index">09 — RECOVERY</p>
+        <ul className="recovery-log mono">
+          {steps.map((step, i) => (
+            <li key={`${step.text}-${i}`} className={step.done ? 'is-done' : 'is-live'}>
+              <span>{step.done ? '✓' : '›'}</span> {step.text}
+            </li>
+          ))}
+        </ul>
+        {done && healthy && (
+          <div className="panel is-live">
+            <p className="status-word is-ok">RECOVERY COMPLETE</p>
+            <p className="mono">NETWORK CONNECTED</p>
+            <p className="mono is-ok">FULLY OPERATIONAL</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
