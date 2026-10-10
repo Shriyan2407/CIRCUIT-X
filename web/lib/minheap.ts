@@ -45,3 +45,49 @@ export class MinHeap {
     this.emit({ type: 'insert', item: { ...item }, index });
     this.bubbleUp(index);
   }
+
+  extractMin(): HeapItem | null {
+    if (this.items.length === 0) return null;
+    const min = this.items[0];
+    const last = this.items.pop() as HeapItem;
+    if (this.items.length > 0) {
+      this.items[0] = last;
+      this.bubbleDown(0);
+    }
+    this.emit({ type: 'extract', item: { ...min } });
+    return min;
+  }
+
+  private bubbleUp(index: number): void {
+    let i = index;
+    while (i > 0) {
+      const parent = Math.floor((i - 1) / 2);
+      if (this.items[parent].value <= this.items[i].value) break;
+      this.swap(i, parent, 'bubble up');
+      i = parent;
+    }
+  }
+
+  private bubbleDown(index: number): void {
+    let i = index;
+    for (;;) {
+      const left = 2 * i + 1;
+      const right = 2 * i + 2;
+      let smallest = i;
+      if (left < this.items.length && this.items[left].value < this.items[smallest].value) smallest = left;
+      if (right < this.items.length && this.items[right].value < this.items[smallest].value) smallest = right;
+      if (smallest === i) break;
+      this.swap(i, smallest, 'bubble down');
+      i = smallest;
+    }
+  }
+
+  private swap(i: number, j: number, label: string): void {
+    [this.items[i], this.items[j]] = [this.items[j], this.items[i]];
+    this.emit({ type: 'swap', i, j, label });
+  }
+
+  private emit(e: HeapEvent): void {
+    this.onEvent?.(e, this.snapshot());
+  }
+}
