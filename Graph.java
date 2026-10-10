@@ -87,3 +87,101 @@ public class Graph {
     // =======================================================================
     // MODULE 2 — Graph Management
     // =======================================================================
+
+    /**
+     * removeNode(id) — Remove a node and all its incident edges.
+     */
+    public boolean removeNode(String id) {
+        if (!nodes.containsKey(id)) {
+            return false;
+        }
+        // Remove all edges incident to this node
+        edges.removeIf(e -> e.getSource().equals(id) || e.getDestination().equals(id));
+
+        // Remove from all other nodes' adjacency lists
+        for (List<Edge> edgeList : adjacencyList.values()) {
+            edgeList.removeIf(e -> e.getSource().equals(id) || e.getDestination().equals(id));
+        }
+
+        adjacencyList.remove(id);
+        nodes.remove(id);
+        return true;
+    }
+
+    /**
+     * removeEdge(src, dst) — Remove the edge between two nodes.
+     */
+    public boolean removeEdge(String src, String dst) {
+        if (!nodes.containsKey(src) || !nodes.containsKey(dst)) {
+            return false;
+        }
+        boolean removed = edges.removeIf(e -> e.connects(src, dst));
+        if (!removed) return false;
+
+        adjacencyList.get(src).removeIf(e -> e.connects(src, dst));
+        adjacencyList.get(dst).removeIf(e -> e.connects(src, dst));
+        return true;
+    }
+
+    /**
+     * updateWeight(src, dst, newWeight) — Change the weight of an existing edge.
+     */
+    public boolean updateWeight(String src, String dst, int newWeight) {
+        if (!nodes.containsKey(src) || !nodes.containsKey(dst)) {
+            return false;
+        }
+        boolean updated = false;
+        for (Edge e : edges) {
+            if (e.connects(src, dst)) {
+                e.setWeight(newWeight);
+                updated = true;
+            }
+        }
+        // Also update in adjacency list
+        for (List<Edge> edgeList : adjacencyList.values()) {
+            for (Edge e : edgeList) {
+                if (e.connects(src, dst)) {
+                    e.setWeight(newWeight);
+                }
+            }
+        }
+        return updated;
+    }
+
+    // =======================================================================
+    // MODULE 3 — Failure Management (delegated to FailureManager)
+    // =======================================================================
+
+    /** Mark a node as failed. */
+    public boolean markNodeFailed(String id) {
+        if (!nodes.containsKey(id)) return false;
+        nodes.get(id).markFailed();
+        return true;
+    }
+
+    /** Mark a node as active (recovered). */
+    public boolean markNodeActive(String id) {
+        if (!nodes.containsKey(id)) return false;
+        nodes.get(id).markActive();
+        return true;
+    }
+
+    /** Mark an edge as failed. */
+    public boolean markEdgeFailed(String src, String dst) {
+        boolean found = false;
+        for (Edge e : edges) {
+            if (e.connects(src, dst)) {
+                e.markFailed();
+                found = true;
+            }
+        }
+        // Also update copies in the adjacency list
+        for (List<Edge> edgeList : adjacencyList.values()) {
+            for (Edge e : edgeList) {
+                if (e.connects(src, dst)) {
+                    e.markFailed();
+                }
+            }
+        }
+        return found;
+    }
