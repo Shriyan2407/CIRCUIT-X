@@ -113,3 +113,72 @@ public class RecoveryEngine {
     // =======================================================================
     // rerouteTraffic() — Find alternate path after a specific failure
     // =======================================================================
+
+    /**
+     * rerouteTraffic(source, destination, failedSrc, failedDst) —
+     *
+     * Given that a link (failedSrc-failedDst) has failed, find an
+     * alternate route from source to destination using Dijkstra
+     * (which automatically ignores failed edges).
+     *
+     * Prints a detailed recovery narrative to the terminal.
+     */
+    public boolean rerouteTraffic(String source, String destination,
+                                   String failedSrc, String failedDst) {
+
+        System.out.println(Colors.CYAN + "\n========================================" + Colors.RESET);
+        System.out.println(Colors.BOLD_RED + "        FAILURE DETECTED" + Colors.RESET);
+        System.out.println(Colors.CYAN + "========================================" + Colors.RESET);
+        System.out.println();
+
+        if (failedSrc != null && failedDst != null) {
+            System.out.println(Colors.RED + "  Failed Link: " + failedSrc + "-" + failedDst + Colors.RESET);
+        }
+
+        System.out.println(Colors.YELLOW + "\n  Analyzing network..." + Colors.RESET);
+
+        // Check if there is a direct path still (direct edge may be failed)
+        System.out.println(Colors.YELLOW + "  Primary route: " + source + " → " + destination + Colors.RESET);
+        System.out.println(Colors.RED + "  Primary route unavailable (failed component on path)." + Colors.RESET);
+        System.out.println(Colors.YELLOW + "\n  Searching for alternate route using Dijkstra..." + Colors.RESET);
+
+        // Dijkstra respects failed edges/nodes automatically
+        List<String> path = pathFinder.getShortestPath(source, destination);
+        int cost = pathFinder.getPathCost(path);
+
+        System.out.println();
+        if (path.isEmpty() || cost < 0) {
+            System.out.println(Colors.BOLD_RED + "  ✗ No alternate route found." + Colors.RESET);
+            System.out.println(Colors.RED + "  RECOVERY FAILED — Network partition exists." + Colors.RESET);
+            System.out.println(Colors.CYAN + "========================================" + Colors.RESET);
+            return false;
+        }
+
+        alternateRoutesFound++;
+        System.out.println(Colors.BOLD_GREEN + "  ✓ Alternate route found!" + Colors.RESET);
+        System.out.println("  Alternate route: " + PathFinder.formatPath(path));
+        System.out.println("  Cost: " + Colors.BOLD_GREEN + cost + Colors.RESET);
+        System.out.println();
+        System.out.println(Colors.YELLOW + "  Rerouting traffic..." + Colors.RESET);
+        System.out.println();
+        System.out.println(Colors.BOLD_GREEN + "  RECOVERY SUCCESSFUL" + Colors.RESET);
+        System.out.println(Colors.GREEN + "  Network connectivity restored." + Colors.RESET);
+        System.out.println(Colors.CYAN + "========================================" + Colors.RESET);
+        return true;
+    }
+
+    /**
+     * Simple reroute — find best path between two nodes given current failures.
+     */
+    public boolean rerouteTraffic(String source, String destination) {
+        return rerouteTraffic(source, destination, null, null);
+    }
+
+    public int getAlternateRoutesFound() {
+        return alternateRoutesFound;
+    }
+
+    public void resetStats() {
+        alternateRoutesFound = 0;
+    }
+}
