@@ -85,3 +85,82 @@ public class NetworkDemo {
             System.out.println(Colors.YELLOW + "  Updating graph..." + Colors.RESET);
         }
         pause();
+
+        // ── STEP 7 — Detect failures ──────────────────────────────────────
+        step(7, "Running Failure Detection");
+        failureManager.detectFailure();
+        pause();
+
+        // ── STEP 8 — Connectivity check (after failure) ───────────────────
+        step(8, "Checking Connectivity AFTER Edge Failure");
+        analyzer.printConnectivityStatus();
+        analyzer.printComponents();
+        pause();
+
+        // ── STEP 9 — Dijkstra shortest path (A to H) ──────────────────────
+        step(9, "Finding Shortest Path: A → H (using Dijkstra + MinHeap)");
+        List<String> path = pathFinder.getShortestPath("A", "H");
+        int cost = pathFinder.getPathCost(path);
+        System.out.println();
+        if (path.isEmpty()) {
+            System.out.println(Colors.RED + "  No path found between A and H." + Colors.RESET);
+        } else {
+            System.out.println("  " + Colors.BOLD_CYAN + "Shortest Path: " + Colors.RESET
+                    + PathFinder.formatPath(path));
+            System.out.println("  " + Colors.BOLD_CYAN + "Total Cost:    " + Colors.RESET
+                    + Colors.BOLD_GREEN + cost + Colors.RESET);
+        }
+        pause();
+
+        // ── STEP 10 — Simulate node failure ───────────────────────────────
+        step(10, "Simulating Node Failure: Node E");
+        boolean nodeFailed = failureManager.markNodeFailed("E");
+        if (nodeFailed) {
+            System.out.println(Colors.BOLD_RED + "\n  [FAILURE] Node E has FAILED." + Colors.RESET);
+            System.out.println(Colors.YELLOW + "  Updating graph — all links through E are now unavailable." + Colors.RESET);
+        }
+        pause();
+
+        // ── STEP 11 — Alternate route after failures ───────────────────────
+        step(11, "Rerouting Traffic: A → H (with B-D and E failed)");
+        recoveryEngine.rerouteTraffic("A", "H", "B", "D");
+        pause();
+
+        // ── STEP 12 — Full network display after failures ─────────────────
+        step(12, "Current Network Status (with failures)");
+        graph.display();
+        pause();
+
+        // ── STEP 13 — Recover network ─────────────────────────────────────
+        step(13, "Recovering Network (restoring all failed components)");
+        recoveryEngine.recoverNetwork();
+        pause();
+
+        // ── STEP 14 — Display recovered network ───────────────────────────
+        step(14, "Network Status AFTER Recovery");
+        graph.display();
+        pause();
+
+        // ── STEP 15 — Reliability report ──────────────────────────────────
+        step(15, "Generating Network Reliability Report");
+        report.generate();
+        pause();
+
+        // ── Final summary ──────────────────────────────────────────────────
+        System.out.println(Colors.BOLD_CYAN + "\n============================================================" + Colors.RESET);
+        System.out.println(Colors.BOLD_GREEN + "         CIRCUIT-X DEMO COMPLETED SUCCESSFULLY" + Colors.RESET);
+        System.out.println(Colors.BOLD_CYAN + "============================================================" + Colors.RESET);
+        System.out.println(Colors.YELLOW + "\n  Demonstrated:" + Colors.RESET);
+        System.out.println("    ✓ Graph creation (Adjacency List)");
+        System.out.println("    ✓ BFS Traversal (Queue)");
+        System.out.println("    ✓ DFS Traversal (Recursion/Stack)");
+        System.out.println("    ✓ Connectivity Analysis");
+        System.out.println("    ✓ Edge Failure Simulation");
+        System.out.println("    ✓ Node Failure Simulation");
+        System.out.println("    ✓ Failure Detection");
+        System.out.println("    ✓ Dijkstra's Algorithm (MinHeap Priority Queue)");
+        System.out.println("    ✓ Alternate Path Finding");
+        System.out.println("    ✓ Traffic Rerouting & Recovery");
+        System.out.println("    ✓ Reliability Report");
+        System.out.println();
+    }
