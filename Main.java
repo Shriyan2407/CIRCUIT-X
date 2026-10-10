@@ -331,3 +331,88 @@ public class Main {
         System.out.println(Colors.YELLOW + "  Checking network connectivity..." + Colors.RESET);
         analyzer.printConnectivityStatus();
     }
+
+    // =======================================================================
+    // OPTION 15 — Detect Failures
+    // =======================================================================
+    private static void detectFailures() {
+        sectionHeader("FAILURE DETECTION");
+        failureManager.detectFailure();
+    }
+
+    // =======================================================================
+    // OPTION 16 — Recover Network
+    // =======================================================================
+    private static void recoverNetwork() {
+        sectionHeader("RECOVER NETWORK");
+        recovery.recoverNetwork();
+    }
+
+    // =======================================================================
+    // OPTION 17 — Reroute Traffic
+    // =======================================================================
+    private static void rerouteTraffic() {
+        sectionHeader("REROUTE TRAFFIC");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Source node      : ");
+        String src = readLine();
+        System.out.print("  Destination node : ");
+        String dst = readLine();
+        if (!graph.hasNode(src)) { System.out.println(Colors.RED + "  ERROR: Node '" + src + "' does not exist." + Colors.RESET); return; }
+        if (!graph.hasNode(dst)) { System.out.println(Colors.RED + "  ERROR: Node '" + dst + "' does not exist." + Colors.RESET); return; }
+        recovery.rerouteTraffic(src, dst);
+    }
+
+    // =======================================================================
+    // OPTION 18 — Generate Report
+    // =======================================================================
+    private static void generateReport() {
+        sectionHeader("NETWORK RELIABILITY REPORT");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        reliReport.generate();
+    }
+
+    // =======================================================================
+    // OPTION 19 — Reset Network
+    // =======================================================================
+    private static void resetNetwork() {
+        sectionHeader("RESET NETWORK");
+        System.out.print("  Are you sure you want to reset the entire network? (yes/no): ");
+        String confirm = readLine();
+        if (confirm.equalsIgnoreCase("yes") || confirm.equalsIgnoreCase("y")) {
+            graph.reset();
+            failureManager.reset();
+            recovery.resetStats();
+            System.out.println(Colors.BOLD_GREEN + "  ✓ Network has been reset." + Colors.RESET);
+        } else {
+            System.out.println(Colors.YELLOW + "  Reset cancelled." + Colors.RESET);
+        }
+    }
+
+    // =======================================================================
+    // OPTION 20 — Run Demo
+    // =======================================================================
+    private static void runDemo() {
+        demo.run();
+    }
+
+    // =======================================================================
+    // Menu Display
+    // =======================================================================
+    private static void printWelcomeBanner() {
+        System.out.println();
+        System.out.println(Colors.BOLD_CYAN + "============================================================" + Colors.RESET);
+        System.out.println(Colors.BOLD_CYAN + "                       CIRCUIT-X" + Colors.RESET);
+        System.out.println(Colors.BOLD_CYAN + "     Dynamic Network Reliability & Failure Recovery" + Colors.RESET);
+        System.out.println(Colors.BOLD_CYAN + "============================================================" + Colors.RESET);
+        System.out.println(Colors.CYAN + "              DSA NETWORK SIMULATION SYSTEM" + Colors.RESET);
+        System.out.println();
+        System.out.println(Colors.YELLOW + "  Data Structures Used:" + Colors.RESET);
+        System.out.println("    • Graph (Adjacency List)");
+        System.out.println("    • BFS  (Queue / FIFO)");
+        System.out.println("    • DFS  (Recursion / Stack)");
+        System.out.println("    • Dijkstra (MinHeap Priority Queue)");
+        System.out.println();
+        System.out.println(Colors.YELLOW + "  Tip: Select option 20 to run the full automated demo." + Colors.RESET);
+        System.out.println(Colors.BOLD_CYAN + "============================================================" + Colors.RESET);
+    }
