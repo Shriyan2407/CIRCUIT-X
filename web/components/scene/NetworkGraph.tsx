@@ -82,3 +82,82 @@ function NetNode({ id, index }: { id: NodeId; index: number }) {
   const edgesGeom = useMemo(() => new THREE.EdgesGeometry(new THREE.BoxGeometry(0.46, 0.46, 0.46)), []);
   const setHovered = useStore((s) => s.setHovered);
   const setSelected = useStore((s) => s.setSelected);
+
+  useFrame((state, dt) => {
+    const s = useStore.getState();
+    const g = group.current;
+    if (!g) return;
+
+    // Boot: each node eases in, staggered by index.
+    const boot = easeOutCubic(clamp01((s.bootT - index * 0.07) / 0.22));
+    const tone = nodeTone(id);
+    const failed = tone === 'failed';
+    const pulse = failed ? 0 : 0.035 * Math.sin(state.clock.elapsedTime * 2.4 + index * 0.9);
+    const size = (failed ? 0.72 : 1 + pulse) * boot;
+    g.scale.setScalar(Math.max(size, 0.0001));
+    g.visible = boot > 0.001;
+
+    if (outline.current) {
+      outline.current.color.lerp(TONE_COLOR[tone], 1 - Math.exp(-dt * 8));
+      outline.current.opacity = failed ? 0.35 : 1;
+    }
+    if (led.current) {
+      led.current.color.lerp(TONE_COLOR[tone], 1 - Math.exp(-dt * 8));
+      led.current.opacity = failed ? 0.25 : 1;
+    }
+    if (label.current) {
+      const showLabel = boot > 0.6;
+      label.current.style.opacity = showLabel ? '1' : '0';
+      label.current.dataset.tone = tone;
+    }
+  });
+
+  return (
+    <group position={NODE_POS[id]}>
+      <group ref={group}>
+        {/* Body: near-black block so the outline and LED carry the colour. */}
+        <mesh>
+          <boxGeometry args={[0.44, 0.44, 0.44]} />
+          <meshBasicMaterial color={COLORS.surface} />
+        </mesh>
+        <lineSegments geometry={edgesGeom}>
+          <lineBasicMaterial ref={outline} color={COLORS.grey} transparent />
+        </lineSegments>
+        {/* Status LED on the top face. */}
+        <mesh position={[0, 0.25, 0]}>
+          <sphereGeometry args={[0.06, 12, 12]} />
+          <meshBasicMaterial ref={led} color={COLORS.grey} transparent />
+        </mesh>
+        {/* Invisible hit target, larger than the block for easy hovering. */}
+        <mesh
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            setHovered(id);
+            document.body.style.cursor = 'pointer';
+          }}
+          onPointerOut={() => {
+            setHovered(null);
+            document.body.style.cursor = '';
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelected(useStore.getState().selected === id ? null : id);
+          }}
+        >
+          <sphereGeometry args={[0.55, 12, 12]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
+      </group>
+      <Html position={[0, 0.62, 0]} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
+        <div ref={label} className="node-label" data-tone="idle">
+          {id}
+          <span className="node-deg">{String(degree(id)).padStart(2, '0')}</span>
+        </div>
+      </Html>
+    </group>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Links: thin cables. A failed link splits into two halves that pull apart.
+// ---------------------------------------------------------------------------
