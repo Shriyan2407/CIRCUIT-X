@@ -402,3 +402,77 @@ export const useStore = create<State>((set, get) => ({
         healthy();
         set({ run: runFor('bfs', HEALTHY, 'A') });
         break;
+
+      case 'dfs':
+        healthy();
+        set({ run: runFor('dfs', HEALTHY, 'A') });
+        break;
+
+      case 'dijkstra':
+        healthy();
+        set({ run: runFor('dijkstra', HEALTHY, 'A', 'H') });
+        break;
+
+      case 'failure':
+        healthy();
+        set({ diagnostic: null });
+        later(1400, () => {
+          get().failEdge('B-D');
+        });
+        break;
+
+      case 'heap':
+        set({ net: HEALTHY, heapFrames: buildHeapFrames(), heapIndex: 0 });
+        break;
+
+      case 'partition':
+        // Same partition as the scripted test: E offline, C—F and D—G cut.
+        // (B—D alone does not disconnect the network; see the project notes.)
+        healthy();
+        later(500, () => get().failNode('E'));
+        later(1500, () => get().failEdge('C-F'));
+        later(2500, () => get().failEdge('D-G'));
+        break;
+
+      case 'reroute': {
+        healthy();
+        later(400, () => get().failEdge('C-F'));
+        later(1600, () => set({ run: runFor('dijkstra', get().net, 'A', 'H') }));
+        break;
+      }
+
+      case 'recovery': {
+        // Start from the partitioned state and restore it step by step.
+        set({
+          net: { failedNodes: ['E'], failedEdges: ['C-F', 'D-G'] },
+          recovery: [],
+        });
+        const steps: { text: string; act: () => void }[] = [
+          { text: 'RESTORING LINK D — G...', act: () => set((s) => ({ net: { ...s.net, failedEdges: s.net.failedEdges.filter((k) => k !== 'D-G') } })) },
+          { text: 'RESTORING LINK C — F...', act: () => set((s) => ({ net: { ...s.net, failedEdges: s.net.failedEdges.filter((k) => k !== 'C-F') } })) },
+          { text: 'RECOVERING NODE E...', act: () => set((s) => ({ net: { ...s.net, failedNodes: s.net.failedNodes.filter((k) => k !== 'E') } })) },
+          { text: 'CHECKING CONNECTIVITY...', act: () => {} },
+          { text: 'RECOVERY COMPLETE', act: () => {} },
+        ];
+        steps.forEach((step, i) => {
+          later(600 + i * 1300, () => {
+            set((s) => ({ recovery: [...s.recovery.map((r) => ({ ...r, done: true })), { text: step.text, done: false }] }));
+            step.act();
+          });
+        });
+        break;
+      }
+
+      case 'simulator':
+        healthy();
+        break;
+
+      default:
+        break;
+    }
+  },
+}));
+
+// Re-export for components that only need the ordering.
+export const CHAPTER_IDS = CHAPTERS.map((c) => c.id);
+export { NODE_IDS, edgeKey };
