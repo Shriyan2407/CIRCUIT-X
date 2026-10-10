@@ -109,3 +109,92 @@ Main.java               ← Entry point & interactive menu
 ├── NetworkDemo.java    ← Automated 15-step demonstration
 └── Colors.java         ← ANSI terminal color codes
 ```
+
+---
+
+## 7. How the Algorithms Work
+
+### BFS (Breadth-First Search)
+Uses a `Queue<String>` (FIFO). Visits nodes level by level. Used for connectivity checking and traversal visualization.
+
+```
+Queue: [A]
+Visit A → Enqueue B, C
+Queue: [B, C]
+Visit B → Enqueue D, E
+Queue: [C, D, E]
+...
+```
+
+### DFS (Depth-First Search)
+Uses recursion (implicit call stack). Explores as deeply as possible before backtracking. Used for component analysis.
+
+```
+Visit A → recurse B → recurse D → recurse G → backtrack
+                                 → recurse H → backtrack
+          → backtrack to A → recurse C → ...
+```
+
+### Dijkstra's Algorithm
+Uses a custom `MinHeap`-backed priority queue. The `dist[]` array holds tentative shortest distances. The `prev[]` map enables path reconstruction.
+
+```
+Initialize: dist[A]=0, dist[*]=∞
+Extract min from MinHeap → settle node u
+For each neighbor v of u:
+    if dist[u] + w(u,v) < dist[v]:
+        dist[v] = dist[u] + w(u,v)   ← RELAXATION
+        prev[v] = u
+        insert/update v in MinHeap
+```
+
+---
+
+## 8. How to Compile
+
+### Requirements
+- Java Development Kit (JDK) 11 or later
+- Command prompt / PowerShell / Terminal
+
+### Compile
+```bash
+cd CIRCUIT-X
+javac *.java
+```
+
+All `.java` files compile to `.class` files in the same directory.
+
+---
+
+## 9. How to Run
+
+```bash
+java Main
+```
+
+You will see the main menu. **For a full demonstration, select option 20.**
+
+### Quick demo run
+```bash
+javac *.java && java Main
+```
+Then enter `20` at the menu.
+
+---
+
+## 10. Example Terminal Session
+
+```
+============================================================
+                       CIRCUIT-X
+     Dynamic Network Reliability & Failure Recovery
+============================================================
+              DSA NETWORK SIMULATION SYSTEM
+
+Enter your choice: 20
+
+STEP 1 — Creating Sample Network (8 Nodes)
+  + Node A added
+  + Node B added
+  ...
+  + Edge A ──[4]── B
