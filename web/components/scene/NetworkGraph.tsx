@@ -161,3 +161,65 @@ function NetNode({ id, index }: { id: NodeId; index: number }) {
 // ---------------------------------------------------------------------------
 // Links: thin cables. A failed link splits into two halves that pull apart.
 // ---------------------------------------------------------------------------
+
+function NetLink({ a, b, w, index }: { a: NodeId; b: NodeId; w: number; index: number }) {
+  const key = edgeKey(a, b);
+  const full = useRef<THREE.Mesh>(null);
+  const halfA = useRef<THREE.Mesh>(null);
+  const halfB = useRef<THREE.Mesh>(null);
+  const mat = useRef<THREE.MeshBasicMaterial>(null);
+  const weight = useRef<HTMLDivElement>(null);
+  const geom = useMemo(() => new THREE.CylinderGeometry(0.018, 0.018, 1, 6, 1), []);
+
+  useFrame((_, dt) => {
+    const s = useStore.getState();
+    const f = s.run ? s.run.frames[s.run.index] : null;
+    const p0 = pos(a).clone();
+    const p1 = pos(b).clone();
+    const directlyFailed = s.net.failedEdges.includes(key);
+    const endpointDown = !isNodeActive(s.net, a) || !isNodeActive(s.net, b);
+    const hoveredHere = s.hovered === a || s.hovered === b;
+    const lit = !!f?.lit.includes(key);
+    const dimmed = s.chapter === 'dijkstra' || s.chapter === 'reroute';
+
+    // Boot: links grow out once their nodes exist.
+    const grow = easeOutCubic(clamp01((s.bootT - 0.42 - index * 0.03) / 0.3));
+
+    // Fracture: 0 = intact, 1 = fully split (over ~0.9s after the break).
+    const brokeAt = s.breakAt[key] ?? 0;
+    const breakT = directlyFailed ? clamp01((performance.now() - brokeAt) / 900) : 1;
+
+    let color: THREE.Color;
+    if (directlyFailed) color = COL.failure;
+    else if (lit) color = COL.healthy;
+    else if (endpointDown) color = COL.failure;
+    else if (hoveredHere) color = COL.healthy;
+    else color = COL.line;
+
+    if (mat.current) {
+      mat.current.color.lerp(color, 1 - Math.exp(-dt * 10));
+      const base = lit || hoveredHere ? 1 : directlyFailed || endpointDown ? 0.55 : 0.7;
+      mat.current.opacity = base * (dimmed && !lit ? 0.35 : 1);
+    }
+
+    if (directlyFailed) {
+      // Pull the two halves apart and sideways so the cable visibly snaps.
+      const dir = new THREE.Vector3().subVectors(p1, p0).normalize();
+      const side = new THREE.Vector3().crossVectors(dir, UP).normalize().multiplyScalar(0.25 * breakT);
+      const gap = 0.18 * breakT;
+      const mA0 = p0.clone().lerp(p1, 0.5 - gap);
+      const mB0 = p0.clone().lerp(p1, 0.5 + gap);
+      if (full.current) full.current.visible = false;
+      if (halfA.current) placeSegment(halfA.current, p0, mA0.clone().add(side), grow);
+      if (halfB.current) placeSegment(halfB.current, mB0.clone().sub(side), p1, grow);
+    } else {
+      if (halfA.current) halfA.current.visible = false;
+      if (halfB.current) halfB.current.visible = false;
+      if (full.current) placeSegment(full.current, p0, p1, grow);
+    }
+
+    if (weight.current) {
+      const show = (s.chapter === 'dijkstra' || s.chapter === 'simulator') && !directlyFailed;
+      weight.current.style.opacity = show ? '1' : '0';
+    }
+  });
