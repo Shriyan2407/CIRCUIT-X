@@ -416,3 +416,92 @@ public class Main {
         System.out.println(Colors.YELLOW + "  Tip: Select option 20 to run the full automated demo." + Colors.RESET);
         System.out.println(Colors.BOLD_CYAN + "============================================================" + Colors.RESET);
     }
+
+    private static void printMenu() {
+        System.out.println();
+        System.out.println(Colors.CYAN + "------------------------------------------------------------" + Colors.RESET);
+        System.out.println(Colors.BOLD_WHITE + "                      MAIN MENU" + Colors.RESET);
+        System.out.println(Colors.CYAN + "------------------------------------------------------------" + Colors.RESET);
+        System.out.println();
+        System.out.println(Colors.YELLOW + "  [NETWORK MANAGEMENT]" + Colors.RESET);
+        System.out.println("    1.  Create Network (wizard)");
+        System.out.println("    2.  Add Node");
+        System.out.println("    3.  Add Edge");
+        System.out.println("    4.  Remove Node");
+        System.out.println("    5.  Remove Edge");
+        System.out.println("    6.  Update Edge Weight");
+        System.out.println("    7.  Display Network");
+        System.out.println();
+        System.out.println(Colors.YELLOW + "  [TRAVERSAL & ANALYSIS]" + Colors.RESET);
+        System.out.println("    8.  BFS Traversal");
+        System.out.println("    9.  DFS Traversal");
+        System.out.println("    10. Check Connectivity");
+        System.out.println("    11. Find Connected Components");
+        System.out.println("    12. Find Shortest Path (Dijkstra)");
+        System.out.println();
+        System.out.println(Colors.YELLOW + "  [FAILURE & RECOVERY]" + Colors.RESET);
+        System.out.println("    13. Simulate Node Failure");
+        System.out.println("    14. Simulate Edge Failure");
+        System.out.println("    15. Detect Failures");
+        System.out.println("    16. Recover Network");
+        System.out.println("    17. Reroute Traffic");
+        System.out.println();
+        System.out.println(Colors.YELLOW + "  [REPORTS & DEMO]" + Colors.RESET);
+        System.out.println("    18. Network Reliability Report");
+        System.out.println("    19. Reset Network");
+        System.out.println(Colors.BOLD_GREEN + "    20. Run CIRCUIT-X Demo  ★" + Colors.RESET);
+        System.out.println();
+        System.out.println("    0.  Exit");
+        System.out.println();
+        System.out.println(Colors.CYAN + "------------------------------------------------------------" + Colors.RESET);
+    }
+
+    // =======================================================================
+    // Input Helpers
+    // =======================================================================
+
+    private static int readInt(String prompt) {
+        System.out.print(prompt);
+        try {
+            String line = scanner.nextLine().trim();
+            return Integer.parseInt(line);
+        } catch (NumberFormatException e) {
+            System.out.println(Colors.RED + "  Invalid input. Please enter a number." + Colors.RESET);
+            return -1;
+        }
+    }
+
+    private static int readPositiveInt() {
+        try {
+            String line = scanner.nextLine().trim();
+            int val = Integer.parseInt(line);
+            if (val <= 0) {
+                System.out.println(Colors.RED + "  Must be a positive number." + Colors.RESET);
+                return 1;
+            }
+            return val;
+        } catch (NumberFormatException e) {
+            System.out.println(Colors.RED + "  Invalid input. Please enter a positive number." + Colors.RESET);
+            return 1;
+        }
+    }
+
+    private static String readLine() {
+        return scanner.nextLine().trim();
+    }
+
+    // =======================================================================
+    // Utility helpers
+    // =======================================================================
+
+    private static void sectionHeader(String title) {
+        System.out.println();
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+        System.out.println(Colors.BOLD_WHITE + "  [" + title + "]" + Colors.RESET);
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+    }
+
+    private static void noNetworkError() {
+        System.out.println(Colors.YELLOW + "\n  Network is empty. Use option 1 or 2 to add nodes first." + Colors.RESET);
+    }
+}
