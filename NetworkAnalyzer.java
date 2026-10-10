@@ -73,3 +73,53 @@ public class NetworkAnalyzer {
         List<String>      activeNodes = getActiveNodeIds();
         Set<String>       globalSeen  = new HashSet<>();
         List<Set<String>> components  = new ArrayList<>();
+
+        for (String startNode : activeNodes) {
+            if (globalSeen.contains(startNode)) continue;
+
+            // BFS to find this component
+            Set<String>   component = new LinkedHashSet<>();
+            Queue<String> queue     = new LinkedList<>();
+
+            queue.offer(startNode);
+            globalSeen.add(startNode);
+
+            while (!queue.isEmpty()) {
+                String current = queue.poll();
+                component.add(current);
+                for (Edge e : graph.getActiveNeighbours(current)) {
+                    String dest = e.getDestination();
+                    if (!globalSeen.contains(dest)) {
+                        globalSeen.add(dest);
+                        queue.offer(dest);
+                    }
+                }
+            }
+            components.add(component);
+        }
+        return components;
+    }
+
+    // =======================================================================
+    // Display helpers
+    // =======================================================================
+
+    /**
+     * printConnectivityStatus() — Print a formatted connectivity report.
+     */
+    public void printConnectivityStatus() {
+        System.out.println(Colors.CYAN + "\n============================================================" + Colors.RESET);
+        System.out.println(Colors.CYAN + "               CONNECTIVITY ANALYSIS" + Colors.RESET);
+        System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+
+        if (graph.isEmpty()) {
+            System.out.println("  Network is empty.");
+            System.out.println(Colors.CYAN + "============================================================" + Colors.RESET);
+            return;
+        }
+
+        boolean connected = isConnected();
+        System.out.println("\n  Is the network connected? "
+                + (connected
+                    ? Colors.BOLD_GREEN + "YES" + Colors.RESET
+                    : Colors.BOLD_RED   + "NO"  + Colors.RESET));
