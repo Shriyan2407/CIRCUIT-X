@@ -60,3 +60,83 @@ export const ARCH_COPY: Record<ArchNodeId, { title: string; body: string; file: 
   recovery: { title: 'Recovery', body: 'Restores failed nodes and links, then checks connectivity and reports the result.', file: 'RecoveryEngine.java' },
   reroute: { title: 'Rerouting', body: 'Asks Dijkstra for the cheapest path on the current active network. Failed parts are skipped automatically.', file: 'RecoveryEngine.java' },
 };
+
+function ArchNodeMesh({ node }: { node: ArchNode }) {
+  const group = useRef<THREE.Group>(null);
+  const body = useRef<THREE.MeshBasicMaterial>(null);
+  const label = useRef<HTMLButtonElement>(null);
+  const selected = useStore((s) => s.archSelected === node.id);
+  const setArchSelected = useStore((s) => s.setArchSelected);
+  const isRoot = node.id === 'root';
+  const isLeaf = !ARCH_NODES.some((n) => n.parent === node.id);
+
+  useFrame((state, dt) => {
+    const g = group.current;
+    if (!g) return;
+    const active = useStore.getState().archSelected === node.id;
+    const target = active ? 1.25 : 1;
+    const pulse = active ? 1 + 0.03 * Math.sin(state.clock.elapsedTime * 3) : 1;
+    g.scale.setScalar(THREE.MathUtils.lerp(g.scale.x, target * pulse, damp(dt, 8)));
+    if (body.current) {
+      const want = new THREE.Color(active ? COLORS.healthy : isRoot ? COLORS.white : COLORS.grey);
+      body.current.color.lerp(want, damp(dt, 8));
+    }
+  });
+
+  return (
+    <group ref={group} position={node.pos}>
+      <mesh
+        onClick={(e) => {
+          e.stopPropagation();
+          setArchSelected(node.id);
+        }}
+        onPointerOver={() => (document.body.style.cursor = 'pointer')}
+        onPointerOut={() => (document.body.style.cursor = '')}
+      >
+        <boxGeometry args={[isLeaf ? 0.3 : 0.4, isLeaf ? 0.3 : 0.4, 0.3]} />
+        <meshBasicMaterial ref={body} color={COLORS.grey} />
+      </mesh>
+      <Html center position={[0, isLeaf ? 0.42 : 0.5, 0]} zIndexRange={[10, 0]}>
+        <button
+          ref={label}
+          type="button"
+          className={`arch-label${selected ? ' is-active' : ''}${isRoot ? ' is-root' : ''}`}
+          onClick={() => setArchSelected(node.id)}
+        >
+          {node.label}
+        </button>
+      </Html>
+    </group>
+  );
+}
+
+function ArchEdges() {
+  const geometry = useMemo(() => {
+    const pts: number[] = [];
+    for (const n of ARCH_NODES) {
+      if (!n.parent) continue;
+      const p = byId[n.parent];
+      pts.push(...p.pos, ...n.pos);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    return g;
+  }, []);
+
+  return (
+    <lineSegments geometry={geometry}>
+      <lineBasicMaterial color={COLORS.line} transparent opacity={0.8} />
+    </lineSegments>
+  );
+}
+
+export function ArchitectureScene() {
+  return (
+    <group>
+      <ArchEdges />
+      {ARCH_NODES.map((n) => (
+        <ArchNodeMesh key={n.id} node={n} />
+      ))}
+    </group>
+  );
+}
