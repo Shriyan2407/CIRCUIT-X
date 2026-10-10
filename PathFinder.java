@@ -211,3 +211,77 @@ public class PathFinder {
             for (Edge e : graph.getActiveNeighbours(u)) {
                 String v      = e.getDestination();
                 int    weight = e.getWeight();
+
+                if (settled.contains(v)) continue;
+
+                int newDist = dist.get(u) + weight;
+
+                // -------------------------------------------------------
+                // DSA: Relaxation step
+                // if new path is shorter, update distance and predecessor
+                // -------------------------------------------------------
+                if (newDist < dist.get(v)) {
+                    dist.put(v, newDist);
+                    prev.put(v, u);
+                    System.out.println("    Relax: " + u + " -> " + v
+                            + "  new dist=" + newDist + Colors.RESET);
+                    pq.insert(v, newDist);  // Insert updated distance
+                }
+            }
+        }
+
+        lastDist = dist;
+        lastPrev = prev;
+        return dist;
+    }
+
+    /**
+     * getShortestPath(source, destination) — Run Dijkstra and return
+     * the path as a list of node IDs from source to destination.
+     * Returns empty list if no path exists.
+     */
+    public List<String> getShortestPath(String source, String destination) {
+        if (!graph.hasNode(source) || !graph.hasNode(destination)) {
+            return Collections.emptyList();
+        }
+
+        Map<String, Integer> dist = dijkstra(source);
+        List<String> path = new ArrayList<>();
+
+        if (dist.get(destination) == null || dist.get(destination) == Integer.MAX_VALUE) {
+            return path;  // No path found
+        }
+
+        // Reconstruct path by walking back through predecessors
+        String current = destination;
+        while (current != null) {
+            path.add(0, current);   // Prepend
+            current = lastPrev.get(current);
+        }
+
+        return path;
+    }
+
+    /**
+     * getPathCost(path) — Calculate total cost of a path.
+     */
+    public int getPathCost(List<String> path) {
+        if (lastDist == null || path.isEmpty()) return 0;
+        String last = path.get(path.size() - 1);
+        Integer cost = lastDist.get(last);
+        return (cost == null || cost == Integer.MAX_VALUE) ? -1 : cost;
+    }
+
+    // =======================================================================
+    // Utility — format path for display
+    // =======================================================================
+    public static String formatPath(List<String> path) {
+        if (path.isEmpty()) return "(no path)";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < path.size(); i++) {
+            sb.append(Colors.BOLD_GREEN).append(path.get(i)).append(Colors.RESET);
+            if (i < path.size() - 1) sb.append(Colors.YELLOW + " -> " + Colors.RESET);
+        }
+        return sb.toString();
+    }
+}
