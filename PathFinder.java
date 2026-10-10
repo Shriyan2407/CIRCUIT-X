@@ -66,3 +66,82 @@ public class PathFinder {
             String nodeColor = node.isFailed() ? Colors.RED : Colors.GREEN;
             System.out.print(Colors.BOLD + "  Visiting: " + Colors.RESET
                     + nodeColor + current + Colors.RESET);
+
+            // Enqueue all active, unvisited neighbours
+            List<Edge> neighbours = graph.getActiveNeighbours(current);
+            System.out.print("  [Enqueue: ");
+            boolean first = true;
+            for (Edge e : neighbours) {
+                String dest = e.getDestination();
+                if (!seen.contains(dest)) {
+                    queue.offer(dest);
+                    seen.add(dest);
+                    if (!first) System.out.print(", ");
+                    System.out.print(dest);
+                    first = false;
+                }
+            }
+            if (first) System.out.print("-");
+            System.out.println("]");
+        }
+        return visited;
+    }
+
+    // =======================================================================
+    // MODULE 4 — DFS Traversal
+    // =======================================================================
+
+    /**
+     * dfsTraverse(startId) — Depth-First Search starting from startId.
+     *
+     * DSA Details:
+     *   - Implemented via recursion (implicit call stack).
+     *   - Explores as deep as possible before backtracking.
+     *   - Only active nodes and active edges are traversed.
+     *
+     * Time complexity:  O(V + E)
+     * Space complexity: O(V) for the recursion stack
+     */
+    public List<String> dfsTraverse(String startId) {
+        List<String> visited = new ArrayList<>();
+        Set<String>  seen    = new HashSet<>();
+
+        if (!graph.hasNode(startId) || graph.getNode(startId).isFailed()) {
+            return visited;
+        }
+
+        System.out.println(Colors.CYAN + "\n[DFS] Starting traversal from node: "
+                + Colors.BOLD_WHITE + startId + Colors.RESET);
+        System.out.println(Colors.CYAN + "[DFS] Using Recursion (implicit call Stack)" + Colors.RESET);
+        System.out.println();
+
+        dfsHelper(startId, seen, visited, 0);
+        return visited;
+    }
+
+    /**
+     * Recursive DFS helper.
+     * depth parameter is used to print indented call-stack visualization.
+     */
+    private void dfsHelper(String nodeId, Set<String> seen, List<String> visited, int depth) {
+        seen.add(nodeId);
+        visited.add(nodeId);
+
+        String indent = "  " + "  ".repeat(depth);
+        Node node = graph.getNode(nodeId);
+        String nodeColor = (node != null && node.isFailed()) ? Colors.RED : Colors.GREEN;
+        System.out.println(indent + Colors.BOLD + "→ Visiting: " + Colors.RESET
+                + nodeColor + nodeId + Colors.RESET
+                + " (depth=" + depth + ")");
+
+        for (Edge e : graph.getActiveNeighbours(nodeId)) {
+            String dest = e.getDestination();
+            if (!seen.contains(dest)) {
+                System.out.println(indent + Colors.YELLOW + "  ↓ Exploring edge: "
+                        + nodeId + " --[" + e.getWeight() + "]--> " + dest + Colors.RESET);
+                dfsHelper(dest, seen, visited, depth + 1);
+                System.out.println(indent + Colors.YELLOW + "  ↑ Backtrack to: "
+                        + nodeId + Colors.RESET);
+            }
+        }
+    }
