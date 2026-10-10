@@ -145,3 +145,69 @@ public class PathFinder {
             }
         }
     }
+
+    // =======================================================================
+    // MODULE 6 — Dijkstra's Shortest Path
+    // =======================================================================
+
+    /**
+     * dijkstra(sourceId) — Compute shortest distances from source to all nodes.
+     *
+     * DSA Details:
+     *   - Uses our custom MinHeap as the priority queue.
+     *   - dist[] array stores tentative shortest distances.
+     *   - predecessor map stores the path for reconstruction.
+     *   - Relaxation: if dist[src] + weight < dist[dst], update.
+     *
+     * Time complexity: O((V + E) log V)
+     * Space complexity: O(V)
+     *
+     * Returns: map of nodeId → shortest distance from source
+     * Also stores predecessor map internally for path reconstruction.
+     */
+    private Map<String, Integer> lastDist;
+    private Map<String, String>  lastPrev;
+
+    public Map<String, Integer> dijkstra(String sourceId) {
+        Map<String, Node> nodes = graph.getNodes();
+
+        // Initialize distance map — all nodes get ∞ except the source
+        Map<String, Integer> dist = new HashMap<>();
+        Map<String, String>  prev = new HashMap<>();   // Predecessor for path reconstruction
+
+        for (String nodeId : nodes.keySet()) {
+            dist.put(nodeId, Integer.MAX_VALUE);
+            prev.put(nodeId, null);
+        }
+        dist.put(sourceId, 0);
+
+        // ---------------------------------------------------------------
+        // DSA: Custom MinHeap-backed Priority Queue
+        // ---------------------------------------------------------------
+        MinHeap pq = new MinHeap(nodes.size() + 1);
+        pq.insert(sourceId, 0);
+
+        Set<String> settled = new HashSet<>();  // Finalized nodes
+
+        System.out.println(Colors.CYAN + "\n[DIJKSTRA] Initializing..." + Colors.RESET);
+        System.out.println(Colors.CYAN + "[DIJKSTRA] Using custom MinHeap Priority Queue" + Colors.RESET);
+        System.out.println();
+
+        while (!pq.isEmpty()) {
+            // Extract node with minimum tentative distance
+            MinHeap.HeapEntry entry = pq.extractMin();
+            String u = entry.key;
+            int    d = entry.value;
+
+            if (settled.contains(u)) continue;
+            if (graph.getNode(u).isFailed()) continue;  // Skip failed nodes
+
+            settled.add(u);
+            System.out.println(Colors.BOLD + "  Settle: " + Colors.RESET
+                    + Colors.GREEN + u + Colors.RESET
+                    + "  dist=" + (d == Integer.MAX_VALUE ? "∞" : d));
+
+            // Relax all active edges from u
+            for (Edge e : graph.getActiveNeighbours(u)) {
+                String v      = e.getDestination();
+                int    weight = e.getWeight();
