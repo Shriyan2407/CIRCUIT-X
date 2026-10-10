@@ -65,3 +65,41 @@ export function DijkstraChapter() {
     </section>
   );
 }
+
+export function HeapChapter() {
+  const frames = useStore((s) => s.heapFrames);
+  const index = useStore((s) => s.heapIndex);
+  const frame = frames[index];
+  return (
+    <section id="heap" data-chapter="heap" className="chapter">
+      <div className="stack-left">
+        <p className="index">06 — CUSTOM MIN HEAP</p>
+        <h2 className="display big">
+          <span className="reveal block">THE NEXT CLOSEST</span>
+          <span className="reveal block dim">IS ALWAYS AT THE TOP.</span>
+        </h2>
+        <div className="panel">
+          <p className="diag-title">{frame?.label ?? 'HEAP'}</p>
+          <p className="mono hud-note">{frame?.note}</p>
+          <dl className="ops">
+            <div>
+              <dt>INSERT</dt>
+              <dd>O(log n) · bubble up</dd>
+            </div>
+            <div>
+              <dt>EXTRACT MIN</dt>
+              <dd>O(log n) · bubble down</dd>
+            </div>
+            <div>
+              <dt>PEEK</dt>
+              <dd>O(1) · root</dd>
+            </div>
+          </dl>
+          <p className="diag-note">
+            Dijkstra keeps its frontier in this heap. Each step pops the cheapest candidate in O(log n) instead of scanning every node.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
