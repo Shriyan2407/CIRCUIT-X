@@ -53,3 +53,54 @@ export function SimulatorChapter() {
   const failEdge = useStore((s) => s.failEdge);
   const recoverAll = useStore((s) => s.recoverAll);
   const log = useStore((s) => s.log);
+
+  const route = shortestPath(net, sim.src, sim.dst);
+  const status = networkStatus(net);
+  const sameNode = sim.src === sim.dst;
+  const liveNodes = NODE_IDS.filter((id) => !net.failedNodes.includes(id));
+  const liveEdges = ALL_EDGE_KEYS.filter((k) => !net.failedEdges.includes(k));
+  const runAlgorithm = () => startRun(sim.algo, sim.src, sim.algo === 'dijkstra' ? sim.dst : undefined);
+
+  return (
+    <section id="simulator" data-chapter="simulator" className="chapter chapter-sim">
+      <div className="sim">
+        <p className="index">11 — LIVE SIMULATOR</p>
+        <h2 className="display sim-title">
+          <span className="block">BREAK IT.</span>
+          <span className="block dim">ROUTE IT.</span>
+        </h2>
+
+        <div className="sim-grid">
+          <fieldset className="panel">
+            <legend className="diag-title">ROUTE</legend>
+            <label>
+              <span>SOURCE</span>
+              <select value={sim.src} onChange={(e) => setSim({ src: e.target.value })}>
+                {NODE_IDS.map((id) => (
+                  <option key={id} value={id}>{id}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>DESTINATION</span>
+              <select value={sim.dst} onChange={(e) => setSim({ dst: e.target.value })}>
+                {NODE_IDS.map((id) => (
+                  <option key={id} value={id}>{id}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>ALGORITHM</span>
+              <select value={sim.algo} onChange={(e) => setSim({ algo: e.target.value as AlgoKind })}>
+                {ALGOS.map((a) => (
+                  <option key={a.value} value={a.value}>{a.label}</option>
+                ))}
+              </select>
+            </label>
+            <div className="btn-row">
+              <button type="button" className="btn primary" onClick={runAlgorithm}>RUN</button>
+              <button type="button" className="btn" onClick={() => startRun('dijkstra', sim.src, sim.dst)} disabled={sameNode}>
+                FIND ALTERNATIVE
+              </button>
+            </div>
+          </fieldset>
