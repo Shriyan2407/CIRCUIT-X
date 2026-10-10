@@ -242,3 +242,79 @@ const clearTimers = (): void => {
   timers.forEach(clearTimeout);
   timers = [];
 };
+
+function runFor(kind: AlgoKind, net: NetState, src: string, dst?: string): Run {
+  let frames: Frame[];
+  let label: string;
+  if (kind === 'bfs') {
+    frames = bfs(net, src).frames;
+    label = `BFS from ${src}`;
+  } else if (kind === 'dfs') {
+    frames = dfs(net, src).frames;
+    label = `DFS from ${src}`;
+  } else {
+    frames = dijkstra(net, src, dst ?? src).frames;
+    label = `Dijkstra ${src} → ${dst ?? src}`;
+  }
+  return { kind, src, dst, frames, index: 0, playing: true, label };
+}
+
+export const useStore = create<State>((set, get) => ({
+  chapter: 'hero',
+  booted: false,
+  bootT: 0,
+  net: HEALTHY,
+  run: null,
+  heapFrames: [],
+  heapIndex: 0,
+  hovered: null,
+  selected: null,
+  menuOpen: false,
+  webgl: null,
+  mobile: false,
+  mouse: { x: 0, y: 0 },
+  breakAt: {},
+  recovery: [],
+  archSelected: 'root',
+  sim: { src: 'A', dst: 'H', algo: 'dijkstra' },
+  diagnostic: null,
+  demo: { active: false, step: 0, total: 0, caption: '' },
+  log: [],
+
+  stopDemo: () => {
+    clearDemoTimers();
+    set({ demo: { active: false, step: 0, total: 0, caption: '' } });
+  },
+
+  startDemo: () => {
+    if (get().demo.active) return;
+    clearDemoTimers();
+    get().setChapter('simulator');
+    const steps = buildDemoSteps();
+    set({ log: [], demo: { active: true, step: 0, total: steps.length, caption: 'Starting demonstration...' } });
+
+    const play = (i: number): void => {
+      const step = steps[i];
+      set({ demo: { active: true, step: i + 1, total: steps.length, caption: step.caption } });
+      step.act();
+      if (i === steps.length - 1) {
+        demoTimers.push(setTimeout(() => get().stopDemo(), step.hold));
+        return;
+      }
+      demoTimers.push(setTimeout(() => play(i + 1), step.hold));
+    };
+    play(0);
+  },
+
+  setBooted: () => set({ booted: true }),
+  setBootT: (t) => set({ bootT: t }),
+  setHovered: (id) => set({ hovered: id }),
+  setSelected: (id) => set({ selected: id }),
+  setMenuOpen: (open) => set({ menuOpen: open }),
+  setWebgl: (ok) => set({ webgl: ok }),
+  setMobile: (m) => set({ mobile: m }),
+  setMouse: (x, y) => set({ mouse: { x, y } }),
+  setArchSelected: (id) => set({ archSelected: id }),
+  setSim: (patch) => set((s) => ({ sim: { ...s.sim, ...patch } })),
+
+  setNet: (net) => set({ net }),
