@@ -199,3 +199,46 @@ function buildDemoSteps(): { caption: string; hold: number; act: () => void }[] 
     { caption: "DEMO COMPLETE — the network found its way through", hold: 2600, act: () => {} },
   ];
 }
+
+
+// ---------------------------------------------------------------------------
+// Heap demo: start from the brief's heap, insert 1 (bubble up), then extract min.
+// Frames are captured from the real MinHeap events.
+// ---------------------------------------------------------------------------
+export function buildHeapFrames(): HeapFrame[] {
+  const frames: HeapFrame[] = [];
+  const heap = MinHeap.fromValues([2, 5, 7, 9, 8], (e, snap) => {
+    let label = '';
+    let note = '';
+    if (e.type === 'swap') {
+      label = e.label === 'bubble up' ? 'BUBBLE UP' : 'BUBBLE DOWN';
+      note = e.label === 'bubble up'
+        ? 'Child is smaller than its parent: swap them and continue upward.'
+        : 'Root was replaced by the last element; push it down past smaller children.';
+    } else if (e.type === 'insert') {
+      label = `INSERT ${e.item.value}`;
+      note = `Placed at the next free slot (index ${e.index}), then bubbles up.`;
+    } else if (e.type === 'extract') {
+      label = `EXTRACT MIN ${e.item.value}`;
+      note = 'Root is removed and returned. The last element takes its place.';
+    }
+    frames.push({ items: snap, label, note });
+  });
+  frames.push({ items: heap.snapshot(), label: 'HEAP READY', note: 'Parent ≤ children at every level.' });
+  heap.insert('n', 1);
+  heap.extractMin();
+  frames.push({ items: heap.snapshot(), label: 'HEAP RESTORED', note: 'Min-heap property holds again.' });
+  return frames;
+}
+
+// ---------------------------------------------------------------------------
+// Timed scripts. Each chapter enter cancels the previous script's timers.
+// ---------------------------------------------------------------------------
+let timers: ReturnType<typeof setTimeout>[] = [];
+const later = (ms: number, fn: () => void): void => {
+  timers.push(setTimeout(fn, ms));
+};
+const clearTimers = (): void => {
+  timers.forEach(clearTimeout);
+  timers = [];
+};
