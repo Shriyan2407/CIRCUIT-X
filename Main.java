@@ -180,3 +180,85 @@ public class Main {
         if (ok) System.out.println(Colors.GREEN + "  ✓ Edge " + src + " <-> " + dst + " removed." + Colors.RESET);
         else    System.out.println(Colors.RED + "  ERROR: No edge exists between '" + src + "' and '" + dst + "'." + Colors.RESET);
     }
+
+    // =======================================================================
+    // OPTION 6 — Update Edge Weight
+    // =======================================================================
+    private static void updateEdgeWeight() {
+        sectionHeader("UPDATE EDGE WEIGHT");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Source node      : ");
+        String src = readLine();
+        System.out.print("  Destination node : ");
+        String dst = readLine();
+        System.out.print("  New weight       : ");
+        int w = readPositiveInt();
+        boolean ok = graph.updateWeight(src, dst, w);
+        if (ok) System.out.println(Colors.GREEN + "  ✓ Weight of " + src + "<->" + dst + " updated to " + w + "." + Colors.RESET);
+        else    System.out.println(Colors.RED + "  ERROR: Edge not found or nodes don't exist." + Colors.RESET);
+    }
+
+    // =======================================================================
+    // OPTION 7 — Display Network
+    // =======================================================================
+    private static void displayNetwork() {
+        sectionHeader("DISPLAY NETWORK");
+        graph.display();
+        graph.printAdjacencyList();
+    }
+
+    // =======================================================================
+    // OPTION 8 — BFS Traversal
+    // =======================================================================
+    private static void bfsTraversal() {
+        sectionHeader("BFS TRAVERSAL");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Enter starting node: ");
+        String start = readLine();
+        if (!graph.hasNode(start)) { System.out.println(Colors.RED + "  ERROR: Node '" + start + "' does not exist." + Colors.RESET); return; }
+        if (graph.getNode(start).isFailed()) { System.out.println(Colors.RED + "  ERROR: Node '" + start + "' is FAILED." + Colors.RESET); return; }
+
+        List<String> result = pathFinder.bfsTraverse(start);
+
+        System.out.println();
+        System.out.println(Colors.CYAN + "  BFS Traversal Result:" + Colors.RESET);
+        System.out.println("  " + Colors.BOLD_GREEN + String.join(" -> ", result) + Colors.RESET);
+        System.out.println("\n  Total nodes visited: " + result.size());
+    }
+
+    // =======================================================================
+    // OPTION 9 — DFS Traversal
+    // =======================================================================
+    private static void dfsTraversal() {
+        sectionHeader("DFS TRAVERSAL");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Enter starting node: ");
+        String start = readLine();
+        if (!graph.hasNode(start)) { System.out.println(Colors.RED + "  ERROR: Node '" + start + "' does not exist." + Colors.RESET); return; }
+        if (graph.getNode(start).isFailed()) { System.out.println(Colors.RED + "  ERROR: Node '" + start + "' is FAILED." + Colors.RESET); return; }
+
+        List<String> result = pathFinder.dfsTraverse(start);
+
+        System.out.println();
+        System.out.println(Colors.CYAN + "  DFS Traversal Result:" + Colors.RESET);
+        System.out.println("  " + Colors.BOLD_GREEN + String.join(" -> ", result) + Colors.RESET);
+        System.out.println("\n  Total nodes visited: " + result.size());
+    }
+
+    // =======================================================================
+    // OPTION 10 — Check Connectivity
+    // =======================================================================
+    private static void checkConnectivity() {
+        sectionHeader("CONNECTIVITY CHECK");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        analyzer.printConnectivityStatus();
+    }
+
+    // =======================================================================
+    // OPTION 11 — Find Connected Components
+    // =======================================================================
+    private static void findComponents() {
+        sectionHeader("CONNECTED COMPONENTS");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        analyzer.printComponents();
+    }
