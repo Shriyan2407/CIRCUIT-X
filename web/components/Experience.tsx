@@ -74,3 +74,84 @@ export function Experience() {
       setLenis(null);
     };
   }, []);
+
+  // Chapter detection: whichever section crosses the middle band becomes the chapter.
+  useEffect(() => {
+    const els = CHAPTERS.map((c) => document.getElementById(c.id)).filter((el): el is HTMLElement => !!el);
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setChapter(entry.target.id as ChapterId);
+        });
+      },
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [setChapter]);
+
+  // Text reveals: each .reveal line rises and sharpens as it enters the viewport.
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>('.reveal').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 28, filter: 'blur(6px)' },
+          {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 1.2,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+          },
+        );
+      });
+    });
+    return () => ctx.revert();
+  }, []);
+
+  // Mouse drives camera parallax on desktop only.
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return;
+      setMouse((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    return () => window.removeEventListener('pointermove', onMove);
+  }, [setMouse]);
+
+  return (
+    <>
+      <div className="scene-wrap" aria-hidden>
+        {webgl === true && <Scene />}
+        {webgl === false && <Fallback />}
+      </div>
+
+      <Boot />
+      <TopBar />
+      <Menu />
+      <AlgorithmHud />
+      <Inspector />
+      <Player />
+
+      <main className="content">
+        <Hero />
+        <NetworkChapter />
+        <BfsChapter />
+        <DfsChapter />
+        <DijkstraChapter />
+        <FailureChapter />
+        <HeapChapter />
+        <PartitionChapter />
+        <RerouteChapter />
+        <RecoveryChapter />
+        <ArchitectureChapter />
+        <SimulatorChapter />
+        <footer className="foot mono">
+          CIRCUIT-X · A graph-based network reliability simulation and DSA demonstration. Java core, simulated visually.
+        </footer>
+      </main>
+    </>
+  );
+}
