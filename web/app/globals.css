@@ -553,3 +553,186 @@ dd {
   opacity: 1;
   visibility: visible;
 }
+
+.menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.menu li {
+  opacity: 0;
+}
+
+.menu button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 4.1vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  color: var(--white);
+  padding: 4px 0;
+  transition: color 0.3s, transform 0.5s var(--ease);
+}
+
+.menu button:hover,
+.menu button.is-current {
+  color: var(--healthy);
+  transform: translateX(-10px);
+}
+
+.menu-index {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--grey);
+  letter-spacing: 0.14em;
+}
+
+/* ---------- Boot ---------- */
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 1.6s var(--ease) 0.6s, visibility 0s linear 2.2s;
+  pointer-events: auto;
+}
+
+.boot.is-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.boot-inner {
+  width: min(560px, 86vw);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.boot-kicker {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(36px, 6vw, 72px);
+  letter-spacing: -0.04em;
+  margin: 0;
+}
+
+.boot-sub {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--grey);
+  margin: 0 0 36px;
+}
+
+.boot-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: #3a3a3a;
+}
+
+.boot-log li {
+  transition: color 0.3s;
+}
+
+.boot-log li.is-shown {
+  color: var(--white);
+}
+
+.boot-tick {
+  display: inline-block;
+  width: 22px;
+  color: var(--healthy);
+}
+
+.boot-stats {
+  margin-top: 36px;
+  display: flex;
+  gap: 28px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--grey);
+  opacity: 0;
+  transition: opacity 0.8s var(--ease);
+}
+
+.boot-stats.is-shown {
+  opacity: 1;
+}
+
+.noscript {
+  position: fixed;
+  inset: auto 0 24px 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  color: var(--grey);
+}
+
+/* ---------- Algorithm HUD ---------- */
+.hud {
+  position: fixed;
+  right: var(--pad);
+  bottom: 28px;
+  z-index: 20;
+  width: min(380px, calc(100vw - 2 * var(--pad)));
+  background: rgba(7, 7, 7, 0.92);
+  border: 1px solid #1f1f1f;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+  pointer-events: auto;
+}
+
+.hud-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: baseline;
+  border-bottom: 1px solid #1a1a1a;
+  padding-bottom: 8px;
+}
+
+.hud-kind {
+  color: var(--healthy);
+  letter-spacing: 0.18em;
+}
+
+.hud-title {
+  color: var(--grey);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud-step {
+  color: var(--grey);
+}
+
+.hud-label {
+  margin: 0;
+  font-size: 14px;
+  color: var(--white);
+}
