@@ -62,3 +62,50 @@ function HeapItemNode({
     </group>
   );
 }
+
+function HeapEdges({ items, current }: { items: HeapItem[]; current: React.RefObject<Map<number, THREE.Vector3>> }) {
+  const lines = useRef<THREE.LineSegments>(null);
+  const geometry = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(MAX_ITEMS * 2 * 3), 3));
+    return g;
+  }, []);
+
+  useFrame(() => {
+    const attr = geometry.getAttribute('position') as THREE.BufferAttribute;
+    const arr = attr.array as Float32Array;
+    let k = 0;
+    for (let i = 1; i < items.length; i++) {
+      const parent = Math.floor((i - 1) / 2);
+      const a = current.current?.get(items[i].id);
+      const b = current.current?.get(items[parent].id);
+      if (!a || !b) continue;
+      arr.set([a.x, a.y, a.z, b.x, b.y, b.z], k * 6);
+      k++;
+    }
+    attr.needsUpdate = true;
+    geometry.setDrawRange(0, k * 2);
+  });
+
+  return (
+    <lineSegments ref={lines} geometry={geometry}>
+      <lineBasicMaterial color={COLORS.grey} transparent opacity={0.55} />
+    </lineSegments>
+  );
+}
+
+/** The heap as a 3D tree. Items keep identity across steps, so bubbling animates as movement. */
+export function HeapScene() {
+  const frame = useStore((s) => s.heapFrames[s.heapIndex]);
+  const items = frame?.items ?? [];
+  const current = useRef(new Map<number, THREE.Vector3>());
+
+  return (
+    <group>
+      <HeapEdges items={items} current={current} />
+      {items.map((item, i) => (
+        <HeapItemNode key={item.id} item={item} index={i} current={current} />
+      ))}
+    </group>
+  );
+}
