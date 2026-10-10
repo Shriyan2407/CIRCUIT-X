@@ -153,3 +153,87 @@ export function dfs(state: NetState, start: string): TraversalResult {
 
   const seen = new Set<string>();
   const callStack: string[] = [];
+
+  const visit = (u: string): void => {
+    seen.add(u);
+    order.push(u);
+    callStack.push(u);
+    frames.push({ label: `enter ${u}`, current: u, visited: [...order], lit: [], stack: [...callStack], note: `Recursive call for ${u}; depth ${callStack.length - 1}.` });
+
+    for (const nb of activeNeighbours(state, u)) {
+      if (seen.has(nb.to)) continue;
+      frames.push({ label: `explore ${u}→${nb.to}`, current: u, visited: [...order], lit: [nb.key], stack: [...callStack], note: `Descend along ${u}–${nb.to}.` });
+      visit(nb.to);
+      frames.push({ label: `backtrack to ${u}`, current: u, visited: [...order], lit: [], stack: [...callStack], note: `Child finished; returning to ${u}.` });
+    }
+    callStack.pop();
+  };
+
+  visit(start);
+  frames.push({ label: 'recursion unwound', current: null, visited: [...order], lit: [], stack: [], note: 'Call stack is empty. Traversal complete.' });
+  return { frames, order };
+}
+
+export interface DijkstraResult {
+  frames: Frame[];
+  dist: Record<string, number>;
+  prev: Record<string, string | null>;
+  path: string[];
+  cost: number; // -1 when unreachable
+}
+
+/** Mirrors PathFinder.dijkstra + getShortestPath, including strict-less relaxation. */
+export function dijkstra(state: NetState, source: string, destination?: string): DijkstraResult {
+  const frames: Frame[] = [];
+  const dist: Record<string, number> = {};
+  const prev: Record<string, string | null> = {};
+  for (const id of NODE_IDS) {
+    dist[id] = Number.POSITIVE_INFINITY;
+    prev[id] = null;
+  }
+  dist[source] = 0;
+
+  const pq = new MinHeap();
+  pq.insert(source, 0);
+  const settled = new Set<string>();
+  const settledOrder: string[] = [];
+
+  const snap = (label: string, lit: string[], current: string | null, note: string): void => {
+    frames.push({
+      label,
+      current,
+      visited: [...settledOrder],
+      lit,
+      dist: Object.fromEntries(NODE_IDS.map((id) => [id, dist[id]])),
+      settled: [...settledOrder],
+      note,
+    });
+  };
+
+  snap(`init ${source}`, [], source, `dist[${source}] = 0, every other node = ∞.`);
+
+  while (pq.size > 0) {
+    const top = pq.extractMin();
+    if (!top) break;
+    const u = top.key;
+    if (settled.has(u)) continue; // stale lazy entry
+    if (!isNodeActive(state, u)) continue;
+
+    settled.add(u);
+    settledOrder.push(u);
+    snap(`settle ${u}`, [], u, `${u} has the smallest tentative distance (${dist[u]}); it is final.`);
+
+    for (const nb of activeNeighbours(state, u)) {
+      const v = nb.to;
+      if (settled.has(v)) continue;
+      const candidate = dist[u] + nb.w;
+      if (candidate < dist[v]) {
+        const previous = dist[v];
+        dist[v] = candidate;
+        prev[v] = u;
+        pq.insert(v, candidate);
+        const before = Number.isFinite(previous) ? String(previous) : '∞';
+        snap(`relax ${u}→${v}`, [nb.key], u, `${dist[u]} + ${nb.w} = ${candidate} < ${before}; update ${v}.`);
+      }
+    }
+  }
