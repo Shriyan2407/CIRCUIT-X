@@ -736,3 +736,190 @@ dd {
   font-size: 14px;
   color: var(--white);
 }
+
+.hud-note {
+  margin: 0;
+  color: var(--grey);
+  line-height: 1.55;
+}
+
+.hud-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hud-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 10px;
+}
+
+.hud-row dt {
+  font-size: 10px;
+  padding-top: 2px;
+}
+
+.hud-row dd {
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.hud-row.is-accent dd {
+  color: var(--healthy);
+}
+
+.hud-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.hud-controls button {
+  flex: 1;
+  background: none;
+  border: 1px solid #2a2a2a;
+  padding: 7px 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.hud-controls button:hover:not(:disabled) {
+  border-color: var(--white);
+}
+
+.hud-controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ---------- Node inspector ---------- */
+.inspector {
+  position: fixed;
+  right: var(--pad);
+  top: 96px;
+  z-index: 20;
+  width: min(300px, calc(100vw - 2 * var(--pad)));
+  background: rgba(7, 7, 7, 0.92);
+  border: 1px solid #1f1f1f;
+  padding: 16px 18px;
+  font-size: 12px;
+  pointer-events: auto;
+}
+
+.inspector-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.inspector-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.inspector-actions button {
+  flex: 1;
+  background: none;
+  border: 1px solid #2a2a2a;
+  padding: 8px 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+/* ---------- Architecture ---------- */
+.hud.is-inline {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  z-index: auto;
+}
+
+.arch-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--white);
+}
+
+/* ---------- Simulator ---------- */
+.sim {
+  width: min(1100px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin: 0 auto;
+  padding-top: 8svh;
+}
+
+.sim-title {
+  font-size: clamp(40px, 6vw, 96px);
+}
+
+.sim-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.sim-grid fieldset {
+  border: 1px solid #1d1d1d;
+  background: rgba(7, 7, 7, 0.9);
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+
+.sim-grid legend {
+  padding: 0 8px;
+}
+
+.sim-grid label {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--grey);
+}
+
+.sim-grid select {
+  background: var(--black);
+  border: 1px solid #2a2a2a;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--white);
+  border-radius: 0;
+}
+
+.sim-grid select:disabled {
+  opacity: 0.4;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  background: none;
+  border: 1px solid #2a2a2a;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  transition: border-color 0.25s, color 0.25s, background 0.25s;
+}
