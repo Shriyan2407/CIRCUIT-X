@@ -262,3 +262,72 @@ public class Main {
         if (graph.isEmpty()) { noNetworkError(); return; }
         analyzer.printComponents();
     }
+
+    // =======================================================================
+    // OPTION 12 — Find Shortest Path (Dijkstra)
+    // =======================================================================
+    private static void findShortestPath() {
+        sectionHeader("SHORTEST PATH — DIJKSTRA");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Source node      : ");
+        String src = readLine();
+        System.out.print("  Destination node : ");
+        String dst = readLine();
+
+        if (!graph.hasNode(src)) { System.out.println(Colors.RED + "  ERROR: Node '" + src + "' does not exist." + Colors.RESET); return; }
+        if (!graph.hasNode(dst)) { System.out.println(Colors.RED + "  ERROR: Node '" + dst + "' does not exist." + Colors.RESET); return; }
+        if (graph.getNode(src).isFailed()) { System.out.println(Colors.RED + "  ERROR: Source node '" + src + "' is FAILED." + Colors.RESET); return; }
+        if (graph.getNode(dst).isFailed()) { System.out.println(Colors.RED + "  ERROR: Destination node '" + dst + "' is FAILED." + Colors.RESET); return; }
+
+        List<String> path = pathFinder.getShortestPath(src, dst);
+        int cost = pathFinder.getPathCost(path);
+
+        System.out.println();
+        if (path.isEmpty() || cost < 0) {
+            System.out.println(Colors.BOLD_RED + "  No valid path exists between '" + src + "' and '" + dst + "'." + Colors.RESET);
+        } else {
+            System.out.println(Colors.CYAN + "  Shortest / Alternate Path:" + Colors.RESET);
+            System.out.println("  " + PathFinder.formatPath(path));
+            System.out.println("\n  Total Cost: " + Colors.BOLD_GREEN + cost + Colors.RESET);
+        }
+    }
+
+    // =======================================================================
+    // OPTION 13 — Simulate Node Failure
+    // =======================================================================
+    private static void simulateNodeFailure() {
+        sectionHeader("SIMULATE NODE FAILURE");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Enter node to fail: ");
+        String name = readLine();
+        if (!graph.hasNode(name)) { System.out.println(Colors.RED + "  ERROR: Node '" + name + "' does not exist." + Colors.RESET); return; }
+        if (graph.getNode(name).isFailed()) { System.out.println(Colors.YELLOW + "  Node '" + name + "' is already FAILED." + Colors.RESET); return; }
+
+        failureManager.markNodeFailed(name);
+        System.out.println(Colors.BOLD_RED + "\n  [FAILURE] Node " + name + " has FAILED." + Colors.RESET);
+        System.out.println(Colors.YELLOW + "  Updating graph..." + Colors.RESET);
+        System.out.println(Colors.YELLOW + "  Checking network connectivity..." + Colors.RESET);
+        analyzer.printConnectivityStatus();
+    }
+
+    // =======================================================================
+    // OPTION 14 — Simulate Edge Failure
+    // =======================================================================
+    private static void simulateEdgeFailure() {
+        sectionHeader("SIMULATE EDGE FAILURE");
+        if (graph.isEmpty()) { noNetworkError(); return; }
+        System.out.print("  Enter source node      : ");
+        String src = readLine();
+        System.out.print("  Enter destination node : ");
+        String dst = readLine();
+        if (!graph.hasNode(src)) { System.out.println(Colors.RED + "  ERROR: Node '" + src + "' does not exist." + Colors.RESET); return; }
+        if (!graph.hasNode(dst)) { System.out.println(Colors.RED + "  ERROR: Node '" + dst + "' does not exist." + Colors.RESET); return; }
+
+        boolean ok = failureManager.markEdgeFailed(src, dst);
+        if (!ok) { System.out.println(Colors.RED + "  ERROR: No edge exists between '" + src + "' and '" + dst + "'." + Colors.RESET); return; }
+
+        System.out.println(Colors.BOLD_RED + "\n  [FAILURE] Link " + src + "-" + dst + " has FAILED." + Colors.RESET);
+        System.out.println(Colors.YELLOW + "  Updating graph..." + Colors.RESET);
+        System.out.println(Colors.YELLOW + "  Checking network connectivity..." + Colors.RESET);
+        analyzer.printConnectivityStatus();
+    }
