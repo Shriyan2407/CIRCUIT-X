@@ -237,3 +237,85 @@ export function dijkstra(state: NetState, source: string, destination?: string):
       }
     }
   }
+
+  const path: string[] = [];
+  let cost = -1;
+  if (destination !== undefined && Number.isFinite(dist[destination])) {
+    let cur: string | null = destination;
+    while (cur !== null) {
+      path.unshift(cur);
+      cur = prev[cur];
+    }
+    cost = dist[destination];
+  }
+
+  if (destination !== undefined) {
+    const pathKeys: string[] = [];
+    for (let i = 0; i + 1 < path.length; i++) pathKeys.push(edgeKey(path[i], path[i + 1]));
+    frames.push({
+      label: cost >= 0 ? 'shortest path found' : 'no path',
+      current: destination,
+      visited: [...settledOrder],
+      lit: pathKeys,
+      dist: Object.fromEntries(NODE_IDS.map((id) => [id, dist[id]])),
+      settled: [...settledOrder],
+      path,
+      cost,
+      note: cost >= 0 ? `Path ${path.join(' → ')} costs ${cost}.` : `${destination} cannot be reached from ${source}.`,
+    });
+  }
+
+  return { frames, dist, prev, path, cost };
+}
+
+/** Shortest path reconstruction used by the simulator and reroute story. */
+export function shortestPath(state: NetState, src: string, dst: string): { path: string[]; cost: number } {
+  const r = dijkstra(state, src, dst);
+  return { path: r.path, cost: r.cost };
+}
+
+/** Mirrors NetworkAnalyzer.findComponents(): BFS over active nodes. */
+export function components(state: NetState): string[][] {
+  const seen = new Set<string>();
+  const out: string[][] = [];
+  for (const start of NODE_IDS) {
+    if (!isNodeActive(state, start) || seen.has(start)) continue;
+    const comp: string[] = [];
+    const queue: string[] = [start];
+    seen.add(start);
+    while (queue.length) {
+      const u = queue.shift() as string;
+      comp.push(u);
+      for (const nb of activeNeighbours(state, u)) {
+        if (!seen.has(nb.to)) {
+          seen.add(nb.to);
+          queue.push(nb.to);
+        }
+      }
+    }
+    out.push(comp);
+  }
+  return out;
+}
+
+export function isConnected(state: NetState): boolean {
+  return components(state).length <= 1;
+}
+
+export type NetworkStatus = 'HEALTHY' | 'DEGRADED' | 'PARTITIONED';
+
+/** Same rule as ReliabilityReport.generate(). */
+export function networkStatus(state: NetState): NetworkStatus {
+  const hasFailures = state.failedNodes.length > 0 || state.failedEdges.length > 0;
+  if (!hasFailures) return 'HEALTHY';
+  return isConnected(state) ? 'DEGRADED' : 'PARTITIONED';
+}
+
+export function activeEdgeKeys(state: NetState): string[] {
+  return EDGE_DEFS.filter((e) => isEdgeActive(state, e.a, e.b)).map((e) => edgeKey(e.a, e.b));
+}
+
+export function edgeEnds(key: string): [NodeId, NodeId] {
+  const [a, b] = key.split('-') as [NodeId, NodeId];
+  return [a, b];
+}
