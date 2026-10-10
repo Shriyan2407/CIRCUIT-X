@@ -86,3 +86,70 @@ export function isEdgeActive(state: NetState, a: string, b: string): boolean {
   if (state.failedEdges.includes(key)) return false;
   return isNodeActive(state, a) && isNodeActive(state, b);
 }
+
+export function degree(id: string): number {
+  return EDGE_DEFS.filter((e) => e.a === id || e.b === id).length;
+}
+
+// ---------------------------------------------------------------------------
+// Frames: one snapshot per visible step. The 3D scene and HUD replay these.
+// ---------------------------------------------------------------------------
+
+export type AlgoKind = 'bfs' | 'dfs' | 'dijkstra';
+
+export interface Frame {
+  label: string;
+  current: string | null;
+  visited: string[];
+  lit: string[]; // edge keys to illuminate this frame
+  queue?: string[]; // BFS
+  stack?: string[]; // DFS call stack
+  level?: Record<string, number>; // BFS layer of each discovered node
+  dist?: Record<string, number>; // Dijkstra tentative distances (Infinity shown as null)
+  settled?: string[]; // Dijkstra settled nodes
+  path?: string[]; // final path highlight
+  cost?: number;
+  note?: string; // short explanation shown in HUD
+}
+
+export interface TraversalResult {
+  frames: Frame[];
+  order: string[];
+}
+
+export function bfs(state: NetState, start: string): TraversalResult {
+  const frames: Frame[] = [];
+  const order: string[] = [];
+  if (!isNodeActive(state, start)) return { frames, order };
+
+  const queue: string[] = [start];
+  const seen = new Set<string>([start]);
+  const level: Record<string, number> = { [start]: 0 };
+
+  frames.push({ label: `enqueue ${start}`, current: null, visited: [], lit: [], queue: [...queue], level: { ...level }, note: 'Start node goes into the FIFO queue.' });
+
+  while (queue.length > 0) {
+    const u = queue.shift() as string;
+    order.push(u);
+    const visited = [...order];
+    frames.push({ label: `dequeue ${u}`, current: u, visited, lit: [], queue: [...queue], level: { ...level }, note: `Visit ${u} at level ${level[u]}.` });
+
+    for (const nb of activeNeighbours(state, u)) {
+      if (seen.has(nb.to)) continue;
+      seen.add(nb.to);
+      level[nb.to] = level[u] + 1;
+      queue.push(nb.to);
+      frames.push({ label: `enqueue ${nb.to}`, current: u, visited: [...order], lit: [nb.key], queue: [...queue], level: { ...level }, note: `${nb.to} discovered from ${u} at level ${level[nb.to]}.` });
+    }
+  }
+  frames.push({ label: 'queue empty', current: null, visited: [...order], lit: [], queue: [], level: { ...level }, note: 'Every reachable node has been visited.' });
+  return { frames, order };
+}
+
+export function dfs(state: NetState, start: string): TraversalResult {
+  const frames: Frame[] = [];
+  const order: string[] = [];
+  if (!isNodeActive(state, start)) return { frames, order };
+
+  const seen = new Set<string>();
+  const callStack: string[] = [];
