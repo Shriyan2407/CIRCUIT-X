@@ -53,3 +53,59 @@ CIRCUIT-X simulates this entire lifecycle in a terminal environment.
 | **Dijkstra** | dist[] + predecessor map + MinHeap | `PathFinder.java` |
 | **Priority Queue** | Backed by custom MinHeap | `MinHeap.java` |
 | **Min-Heap** | Binary heap in array | `MinHeap.java` |
+
+### Adjacency List Example
+```
+A -> B(4), C(2)
+B -> A(4), D(5), E(3)
+C -> A(2), E(6), F(7)
+D -> B(5), E(1), G(4)
+...
+```
+
+### Min-Heap Operations
+- `insert()` → O(log n) — bubble up
+- `extractMin()` → O(log n) — bubble down
+- `peek()` → O(1)
+
+### Dijkstra Relaxation
+```
+if dist[u] + weight(u,v) < dist[v]:
+    dist[v] = dist[u] + weight(u,v)
+    prev[v] = u
+```
+
+---
+
+## 5. Modules
+
+| Module | Description |
+|---|---|
+| **Module 1** | Network Creation — `addNode()`, `addEdge()` |
+| **Module 2** | Graph Management — `removeNode()`, `removeEdge()`, `updateWeight()` |
+| **Module 3** | Failure Detection — `detectFailure()`, `markFailed()` |
+| **Module 4** | Network Traversal — `bfsTraverse()`, `dfsTraverse()` |
+| **Module 5** | Connectivity Analysis — `isConnected()`, `findComponents()` |
+| **Module 6** | Path Finding — `dijkstra()`, `getShortestPath()` |
+| **Module 7** | Recovery / Rerouting — `recoverNetwork()`, `rerouteTraffic()` |
+| **Module 8** | Reliability Report |
+| **Module 9** | Automated Demo Mode |
+
+---
+
+## 6. Architecture
+
+```
+Main.java               ← Entry point & interactive menu
+├── Graph.java          ← Adjacency list graph structure
+│   ├── Node.java       ← Network node (router/computer)
+│   └── Edge.java       ← Network link with weight + failure state
+├── MinHeap.java        ← Custom binary min-heap implementation
+├── PathFinder.java     ← BFS, DFS, Dijkstra algorithms
+├── FailureManager.java ← Node/edge failure tracking
+├── NetworkAnalyzer.java← Connectivity analysis, components
+├── RecoveryEngine.java ← Recovery and traffic rerouting
+├── ReliabilityReport.java ← Live reliability report generator
+├── NetworkDemo.java    ← Automated 15-step demonstration
+└── Colors.java         ← ANSI terminal color codes
+```
