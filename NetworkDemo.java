@@ -164,3 +164,85 @@ public class NetworkDemo {
         System.out.println("    ✓ Reliability Report");
         System.out.println();
     }
+
+    // =======================================================================
+    // Sample Network
+    // =======================================================================
+
+    /**
+     * Build an 8-node network with redundant paths.
+     *
+     * Topology:
+     *       B ─── D ─── G
+     *      / \   / \     \
+     *     A   \ /   \     H
+     *      \   E     F ──/
+     *       \ /     /
+     *        C ────/
+     *
+     * Multiple paths between key nodes ensure recovery demo works.
+     */
+    private void buildSampleNetwork() {
+        // Nodes
+        String[] nodeNames = {"A", "B", "C", "D", "E", "F", "G", "H"};
+        for (String n : nodeNames) {
+            graph.addNode(n);
+            System.out.println(Colors.GREEN + "  + Node " + n + " added" + Colors.RESET);
+        }
+
+        // Edges with weights
+        addEdge("A", "B", 4);
+        addEdge("A", "C", 2);
+        addEdge("B", "D", 5);
+        addEdge("B", "E", 3);
+        addEdge("C", "E", 6);
+        addEdge("C", "F", 7);
+        addEdge("D", "E", 1);
+        addEdge("D", "G", 4);
+        addEdge("E", "F", 2);
+        addEdge("E", "H", 8);
+        addEdge("F", "H", 3);
+        addEdge("G", "H", 5);
+
+        System.out.println();
+        System.out.println(Colors.BOLD_GREEN + "  Sample network created: 8 nodes, 12 edges" + Colors.RESET);
+        System.out.println(Colors.YELLOW + "  Multiple redundant paths exist for recovery demonstration." + Colors.RESET);
+    }
+
+    private void addEdge(String src, String dst, int weight) {
+        graph.addEdge(src, dst, weight);
+        System.out.println(Colors.CYAN + "  + Edge " + src + " ──[" + weight + "]── " + dst + Colors.RESET);
+    }
+
+    // =======================================================================
+    // Utilities
+    // =======================================================================
+
+    private static final String BOLD_CYAN = Colors.BOLD_CYAN;
+    private static final String RESET     = Colors.RESET;
+
+    private void printBanner() {
+        System.out.println(Colors.BOLD_CYAN + "\n============================================================" + RESET);
+        System.out.println(Colors.BOLD_CYAN + "             CIRCUIT-X AUTOMATED DEMO" + RESET);
+        System.out.println(Colors.BOLD_CYAN + "  Dynamic Network Reliability & Failure Recovery" + RESET);
+        System.out.println(Colors.BOLD_CYAN + "============================================================" + RESET);
+        System.out.println(Colors.YELLOW + "\n  This demo runs through all modules automatically." + RESET);
+        System.out.println(Colors.YELLOW + "  Each step pauses briefly for readability." + RESET);
+        System.out.println();
+    }
+
+    private void step(int num, String description) {
+        System.out.println(Colors.BOLD_CYAN + "\n──────────────────────────────────────────────────────────" + RESET);
+        System.out.println(Colors.BOLD_WHITE + "  STEP " + num + " — " + description + RESET);
+        System.out.println(Colors.BOLD_CYAN + "──────────────────────────────────────────────────────────" + RESET);
+        System.out.println();
+    }
+
+    private void pause() {
+        try {
+            Thread.sleep(600);  // 600ms pause between steps
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
