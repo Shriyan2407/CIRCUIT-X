@@ -318,3 +318,87 @@ export const useStore = create<State>((set, get) => ({
   setSim: (patch) => set((s) => ({ sim: { ...s.sim, ...patch } })),
 
   setNet: (net) => set({ net }),
+
+  failNode: (id) => {
+    const { net } = get();
+    if (net.failedNodes.includes(id)) return;
+    note(`manual: node ${id} failed`);
+    set({ net: { ...net, failedNodes: [...net.failedNodes, id] }, selected: null, diagnostic: `NODE ${id} OFFLINE` });
+  },
+
+  failEdge: (key) => {
+    const { net, breakAt } = get();
+    if (net.failedEdges.includes(key)) return;
+    note(`manual: link ${key} failed`);
+    set({
+      net: { ...net, failedEdges: [...net.failedEdges, key] },
+      breakAt: { ...breakAt, [key]: performance.now() },
+      diagnostic: `LINK ${key.replace('-', ' — ')} OFFLINE`,
+    });
+  },
+
+  recoverAll: () => {
+    note('manual: network recovered');
+    set({ net: HEALTHY, run: null, diagnostic: null });
+  },
+
+  startRun: (kind, src, dst) => {
+    note(`manual: ${kind} ${src}${dst ? ` → ${dst}` : ''}`);
+    set({ run: runFor(kind, get().net, src, dst) });
+  },
+
+  stepRun: (delta) => {
+    const { run } = get();
+    if (!run) return;
+    const index = Math.min(run.frames.length - 1, Math.max(0, run.index + delta));
+    set({ run: { ...run, index, playing: false } });
+  },
+
+  togglePlay: () => {
+    const { run } = get();
+    if (!run) return;
+    const atEnd = run.index >= run.frames.length - 1;
+    set({ run: { ...run, playing: atEnd ? false : !run.playing, index: atEnd ? 0 : run.index } });
+  },
+
+  restartRun: () => {
+    const { run } = get();
+    if (!run) return;
+    set({ run: { ...run, index: 0, playing: true } });
+  },
+
+  stopRun: () => set({ run: null }),
+
+  stepHeap: (delta) => {
+    const { heapFrames, heapIndex } = get();
+    if (heapFrames.length === 0) return;
+    const next = (heapIndex + delta + heapFrames.length) % heapFrames.length;
+    set({ heapIndex: next });
+  },
+
+  setRecovery: (steps) => set({ recovery: steps }),
+
+  setChapter: (id) => {
+    clearTimers();
+    // While the demonstration runs it owns the network and the run. A chapter change
+    // (including the scroll that carries the visitor to the simulator) only moves the camera.
+    if (get().demo.active) {
+      if (get().chapter !== id) set({ chapter: id });
+      return;
+    }
+    const s = get();
+    if (s.chapter === id) return;
+    set({ chapter: id, selected: null, menuOpen: false, diagnostic: null, run: null });
+
+    const healthy = () => set({ net: HEALTHY });
+
+    switch (id) {
+      case 'network':
+      case 'architecture':
+        healthy();
+        break;
+
+      case 'bfs':
+        healthy();
+        set({ run: runFor('bfs', HEALTHY, 'A') });
+        break;
