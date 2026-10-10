@@ -223,3 +223,90 @@ function NetLink({ a, b, w, index }: { a: NodeId; b: NodeId; w: number; index: n
       weight.current.style.opacity = show ? '1' : '0';
     }
   });
+
+  const mid = pos(a).clone().add(pos(b)).multiplyScalar(0.5);
+  return (
+    <group>
+      <mesh ref={full} geometry={geom}>
+        <meshBasicMaterial ref={mat} color={COLORS.line} transparent />
+      </mesh>
+      <mesh ref={halfA} geometry={geom}>
+        <meshBasicMaterial color={COLORS.failure} transparent opacity={0.9} />
+      </mesh>
+      <mesh ref={halfB} geometry={geom}>
+        <meshBasicMaterial color={COLORS.failure} transparent opacity={0.9} />
+      </mesh>
+      <Html position={[mid.x, mid.y + 0.16, mid.z]} center zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
+        <div ref={weight} className="edge-weight">
+          {w}
+        </div>
+      </Html>
+    </group>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Packets: instanced data dots that travel along active links.
+// ---------------------------------------------------------------------------
+
+/** Deterministic pseudo-random in [0, 1). Keeps packet layout stable across renders. */
+const hash01 = (n: number): number => {
+  const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+function Packets({ count }: { count: number }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  const seeds = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => ({
+        edge: i % ALL_EDGE_KEYS.length,
+        phase: hash01(i),
+        speed: 0.12 + hash01(i + 1000) * 0.12,
+        dir: i % 2 === 0 ? 1 : -1,
+      })),
+    [count],
+  );
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  useFrame((state) => {
+    const m = mesh.current;
+    if (!m) return;
+    const s = useStore.getState();
+    const boot = clamp01((s.bootT - 0.85) / 0.15);
+    const dimmed = s.chapter === 'dijkstra' || s.chapter === 'reroute';
+    const t = state.clock.elapsedTime;
+    seeds.forEach((seed, i) => {
+      const edge = EDGE_DEFS[seed.edge];
+      const alive = isEdgeActive(s.net, edge.a, edge.b) && boot > 0;
+      const k = (seed.phase + t * seed.speed * seed.dir) % 1;
+      const u = k < 0 ? k + 1 : k;
+      dummy.position.copy(pos(edge.a)).lerp(pos(edge.b), u);
+      dummy.scale.setScalar(alive ? (dimmed ? 0.4 : 1) * 0.9 : 0.0001);
+      dummy.updateMatrix();
+      m.setMatrixAt(i, dummy.matrix);
+    });
+    m.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, count]} frustumCulled={false}>
+      <sphereGeometry args={[0.035, 8, 8]} />
+      <meshBasicMaterial color={COLORS.healthy} toneMapped={false} />
+    </instancedMesh>
+  );
+}
+
+export function NetworkGraph({ packetCount = 36 }: { packetCount?: number }) {
+  return (
+    <group>
+      {EDGE_DEFS.map((e, i) => (
+        <NetLink key={edgeKey(e.a, e.b)} a={e.a} b={e.b} w={e.w} index={i} />
+      ))}
+      {NODE_IDS.map((id, i) => (
+        <NetNode key={id} id={id} index={i} />
+      ))}
+      <Packets count={packetCount} />
+    </group>
+  );
+}
